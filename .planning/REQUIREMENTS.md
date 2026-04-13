@@ -15,6 +15,11 @@
 - RabbitMQ/Kafka or other external message brokers.
 - DB writing from non-HTTP protocols.
 
+## Definition of Done (DoD)
+- **Coverage**: Must be above 80% with visual stats printed for showcase (`go test -coverprofile` etc.).
+- **Tests Per Phase**: Every phase requires Unit Tests and Integration Tests.
+- **Hell Cases**: Must explicitly test edge cases, catastrophic failures, connection drops, and slow consumers.
+
 ## Must Have (Table Stakes)
 - **REQ-1:** Internal HTTP Server handling Manga CRUD and Auth.
 - **REQ-2:** SQLite DB fully operational with `journal_mode=WAL` and single open connection.

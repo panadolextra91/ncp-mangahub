@@ -37,5 +37,5 @@
 - **Depends on:** Phase 8, Phase 7, Phase 6, Phase 5, Phase 4
 
 ## Phase 10: Demo Integration & E2E Verification
-- **Goal:** Verify the full 5-protocol interaction flow as documented in `docs/plan.md` to ensure the final demo works seamlessly.
+- **Goal:** Comprehensive E2E Testing of the full 5-protocol interaction flow. This phase must focus intensely on "hell paths" alongside the happy path (e.g., dropping SQLite lock, stalling TCP readers, malformed UDP packets, network partitioning).
 - **Depends on:** Phase 9

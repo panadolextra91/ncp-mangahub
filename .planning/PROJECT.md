@@ -43,6 +43,7 @@ Ensure 100% stable demonstration of all 5 protocols working together seamlessly.
 - **Architecture**: Modular Monolith + Event-Driven Lite — Easiest to deploy and explain conceptually.
 - **Database**: SQLite with WAL — Minimizes complex deployment footprint while managing concurrency using connection tuning (`SetMaxOpenConns(1)`).
 - **Concurrency**: Goroutines per protocol (`httpServer`, `tcpServer`, etc.), rigorously tied to context cancellation for clean exits.
+- **Testing (DoD)**: Every phase must include Unit & Integration tests with >80% coverage and "hell cases" explicitly covered. Coverage output must be printable for showcase.
 
 ## Key Decisions
 
