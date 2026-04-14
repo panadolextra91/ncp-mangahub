@@ -58,6 +58,17 @@ func InitSchema(db *sql.DB) error {
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (manga_id) REFERENCES mangas(id)
 	);
+
+	CREATE TABLE IF NOT EXISTS chat_messages (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		manga_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		sender_name TEXT NOT NULL,
+		content TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_chat_manga_id ON chat_messages(manga_id);
 	`
 	_, err := db.Exec(schema)
 	if err != nil {

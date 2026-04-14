@@ -19,3 +19,8 @@ type ProgressRepository interface {
 	Save(progress *models.UserProgress) error
 	FindByUserAndManga(userID, mangaID int) (*models.UserProgress, error)
 }
+
+type ChatRepository interface {
+	Save(msg *models.ChatMessage) error
+	GetRecentByManga(mangaID int, limit int) ([]*models.ChatMessage, error)
+}

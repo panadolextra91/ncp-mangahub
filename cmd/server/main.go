@@ -18,6 +18,8 @@ import (
 	"github.com/user/mangahub/internal/infrastructure"
 	mh_http "github.com/user/mangahub/internal/interfaces/http"
 	mh_tcp "github.com/user/mangahub/internal/interfaces/tcp"
+	mh_ws "github.com/user/mangahub/internal/interfaces/ws"
+	"github.com/user/mangahub/pkg/models"
 )
 
 func main() {
@@ -36,12 +38,12 @@ func main() {
 	}
 
 	// 3. Initialize Shared Components
-	bus := eventbus.NewEventBus(100) // 100 buffer size for demo
+	bus := eventbus.NewEventBus(100)
 
-	// 4. Initialize TCP Hub & Server (Protocol Layer 2)
+	// 4. Initialize Protocol Layers
+	// --- TCP ---
 	tcpHub := mh_tcp.NewHub(cfg.MaxTCPClients)
 	go tcpHub.Run()
-
 	tcpServer := mh_tcp.NewServer(":"+cfg.TCPPort, tcpHub, cfg.JWTSecret)
 	go func() {
 		if err := tcpServer.Start(); err != nil {
@@ -49,34 +51,49 @@ func main() {
 		}
 	}()
 
-	// 5. Bridge EventBus to TCP Hub (Real-time Broadcast)
-	go func() {
-		ch := make(chan interface{}, 10)
-		bus.Subscribe("manga.new", ch)
-		bus.Subscribe("progress.updated", ch)
-		for event := range ch {
-			jsonData, _ := json.Marshal(event)
-			tcpHub.Broadcast(jsonData)
-		}
-	}()
+	// --- WebSocket ---
+	wsHub := mh_ws.NewHub()
+	go wsHub.Run()
 
-	// 6. Initialize Repositories (Adapters)
+	// 5. Initialize Repositories
 	userRepo := database.NewSqliteUserRepository(db)
 	mangaRepo := database.NewSqliteMangaRepository(db)
 	progRepo := database.NewSqliteProgressRepository(db)
+	chatRepo := database.NewSqliteChatRepository(db)
 
-	// 7. Initialize Services (Application)
+	// 6. Initialize Services
 	authSvc := application.NewAuthService(userRepo)
 	mangaSvc := application.NewMangaService(mangaRepo, bus)
 	progSvc := application.NewProgressService(progRepo, bus)
+	chatSvc := application.NewChatService(chatRepo, bus)
 
-	// 8. Initialize HTTP Transport (Interfaces)
+	// 7. Bridge EventBus to Protocol Hubs (Real-time Broadcast)
+	bridge := func(ch <-chan models.Event) {
+		for event := range ch {
+			jsonData, _ := json.Marshal(event.Payload)
+			tcpHub.Broadcast(jsonData)
+
+			if msg, ok := event.Payload.(*models.ChatMessage); ok {
+				wsHub.Broadcast <- msg
+			}
+		}
+	}
+
+	go bridge(bus.Subscribe("manga.new"))
+	go bridge(bus.Subscribe("progress.updated"))
+	go bridge(bus.Subscribe("chat.message"))
+
+	// 8. Initialize HTTP & WS Handlers
 	authH := mh_http.NewAuthHandler(authSvc, cfg.JWTSecret)
 	mangaH := mh_http.NewMangaHandler(mangaSvc)
 	progH := mh_http.NewProgressHandler(progSvc)
 	healthH := mh_http.NewHealthHandler(db, bus)
+	wsH := mh_ws.NewChatHandler(wsHub, chatSvc, cfg.JWTSecret)
 
 	mux := mh_http.SetupRouter(authH, mangaH, progH, healthH, cfg.JWTSecret)
+	
+	// Register WS endpoint
+	mux.HandleFunc("/api/chat", wsH.HandleWS)
 
 	httpServer := &http.Server{
 		Addr:    ":" + cfg.Port,
@@ -85,7 +102,7 @@ func main() {
 
 	// 9. Start HTTP Server
 	go func() {
-		fmt.Printf("🚀 MangaHub Core API (HTTP) listening on port %s\n", cfg.Port)
+		fmt.Printf("🚀 MangaHub Core API (HTTP + WS) listening on port %s\n", cfg.Port)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("HTTP Server Error: %v", err)
 		}
