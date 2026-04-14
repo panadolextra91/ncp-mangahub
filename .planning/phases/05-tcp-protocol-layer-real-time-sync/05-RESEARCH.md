@@ -1,7 +1,9 @@
 # Phase 5 Research: TCP Protocol Layer (Real-time Sync)
 
 ## 1. Config Refactor
-The `Config` struct will be updated to include `TCPPort` loaded from `TCP_PORT` env var with a fallback to `9090`.
+The `Config` struct will be updated to include:
+- `TCPPort`: Default "9090".
+- `MaxTCPClients`: Default 100 (DOS protection).
 
 ## 2. JWT Logic Centralization
 To support both HTTP Middleware and TCP Handshake, JWT logic will be moved to `pkg/auth/jwt.go`:
@@ -22,6 +24,11 @@ func (h *Hub) Run() {
     for {
         select {
         case conn := <-h.register:
+            if len(h.clients) >= h.maxClients {
+                fmt.Fprintf(conn, "503 Service Unavailable - Server Full\n")
+                conn.Close()
+                continue
+            }
             h.clients[conn] = true
         case conn := <-h.unregister:
             if _, ok := h.clients[conn]; ok {
@@ -46,6 +53,7 @@ func (h *Hub) Run() {
 ## 4. Handshake Logic
 - Server listener spawned in `main.go`.
 - `Accept()` loop.
+- **Security Upgrade:** Set a 5-second deadline immediately after `Accept()` using `conn.SetReadDeadline(time.Now().Add(5 * time.Second))`.
 - One-time read: `AUTH <token>`.
 - Verification using `pkg/auth/jwt`.
 

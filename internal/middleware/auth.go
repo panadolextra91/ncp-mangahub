@@ -2,11 +2,10 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/user/mangahub/pkg/auth"
 )
 
 type contextKey string
@@ -33,30 +32,15 @@ func AuthMiddleware(secret string) func(http.Handler) http.Handler {
 			}
 
 			tokenString := parts[1]
-			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-				}
-				return []byte(secret), nil
-			})
-
-			if err != nil || !token.Valid {
+			claims, err := auth.ValidateToken(tokenString, secret)
+			if err != nil {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 				return
 			}
 
-			claims, ok := token.Claims.(jwt.MapClaims)
-			if !ok {
-				http.Error(w, "Invalid claims", http.StatusUnauthorized)
-				return
-			}
-
 			// Extract data and inject into context
-			userID := int(claims["user_id"].(float64))
-			role := claims["role"].(string)
-
-			ctx := context.WithValue(r.Context(), UserIDKey, userID)
-			ctx = context.WithValue(ctx, RoleKey, role)
+			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
+			ctx = context.WithValue(ctx, RoleKey, claims.Role)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

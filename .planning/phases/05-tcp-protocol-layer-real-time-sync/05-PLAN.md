@@ -25,7 +25,7 @@ Implement a high-performance, secured TCP protocol layer that broadcasts real-ti
 - .planning/phases/05-tcp-protocol-layer-real-time-sync/05-RESEARCH.md
 </read_first>
 <action>
-1. Update `config/config.go` to include `TCPPort` (default "9090").
+1. Update `config/config.go` to include `TCPPort` (default "9090") and `MaxTCPClients` (default 100).
 2. Create `pkg/auth/jwt.go` incorporating `GenerateToken` and `ValidateToken` functions.
 3. Update `internal/middleware/auth.go` and `internal/interfaces/http/handlers.go` to utilize the new `pkg/auth` logic ensuring 100% backward compatibility for the HTTP API.
 </action>
@@ -40,7 +40,8 @@ Implement a high-performance, secured TCP protocol layer that broadcasts real-ti
 </read_first>
 <action>
 1. Create `internal/interfaces/tcp/hub.go`. Implement the `Hub` with `register`, `unregister`, and `broadcast` channels.
-2. Ensure the `broadcast` loop uses a non-blocking write strategy (select with default or write timeout) to prevent slow consumers from impacting other clients.
+2. Implement DOS check in Hub registration: If `len(clients) >= MaxTCPClients`, send `503 Service Unavailable - Server Full` and close connection.
+3. Ensure the `broadcast` loop uses a non-blocking write strategy (select with default or write timeout) to prevent slow consumers from impacting other clients.
 </action>
 <acceptance_criteria>
 - Hub logic avoids `sync.Mutex` for broadcasting.
@@ -53,8 +54,9 @@ Implement a high-performance, secured TCP protocol layer that broadcasts real-ti
 </read_first>
 <action>
 1. Create `internal/interfaces/tcp/server.go`. Implement a TCP server that listens on `TCPPort`.
-2. Implement the Handshake: Every new connection must provide `AUTH <JWT>` as the first line.
-3. Send `200 OK CONNECTED\n` on success, or `401 Unauthorized\n` + close on failure.
+2. Implement Handshake Timeout: Set `conn.SetReadDeadline` (5 seconds) immediately after Accept.
+3. Implement the Handshake: Every new connection must provide `AUTH <JWT>` as the first line.
+4. Send `200 OK CONNECTED\n` on success, or `401 Unauthorized\n` + close on failure.
 </action>
 <acceptance_criteria>
 - TCP server requires valid JWT for entry.

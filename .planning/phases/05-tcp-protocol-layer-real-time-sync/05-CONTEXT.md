@@ -14,11 +14,13 @@
    - **Details:** Upon connection, the server waits for a mandatory first line starting with `AUTH `. The token is validated using the shared system secret.
      - **Success:** Respond with `200 OK CONNECTED`.
      - **Failure:** Respond with `401 Unauthorized` and terminate connection.
+   - **Deadline:** Every connection must complete the `AUTH` handshake within **5 seconds** (using `conn.SetReadDeadline`). Failures or idle connections are terminated to prevent Goroutine leaks.
 
 3. **Concurrency Pattern (Channel Registry)**
-   - **Decision:** Hub/Registry pattern using Go Channels (Idiomatic Go).
+   - **Decision:** Hub/Registry pattern using Go Channels (Idiomatic Go) with **DOS Protection**.
    - **Details:**
      - Use a central `Hub` struct with `register`, `unregister`, and `broadcast` channels.
+     - **DOS Protection:** Implement a `MaxTCPClients` limit (default 100). If the Hub is full, new connections are served a `503 Service Unavailable - Server Full` message and closed immediately.
      - A single goroutine manages the state in a `select` loop (no `sync.RWMutex` for broadcasting).
      - **Slow-Consumer Prevention:** If a client's send buffer is full, the Hub must immediately drop the message for that specific client or disconnect them to prevent head-of-line blocking for the entire system.
 

@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/user/mangahub/internal/application"
 	"github.com/user/mangahub/internal/eventbus"
 	"github.com/user/mangahub/internal/middleware"
+	"github.com/user/mangahub/pkg/auth"
 	"github.com/user/mangahub/pkg/models"
 )
 
@@ -59,13 +59,8 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"role":    user.Role,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(h.jwtSecret))
+	// Generate JWT
+	tokenString, err := auth.GenerateToken(user.ID, user.Role, h.jwtSecret)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
