@@ -19,6 +19,20 @@ func TestSQLiteConnection(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestInitSchema(t *testing.T) {
+	db, _ := infrastructure.NewSQLiteDB(":memory:")
+	defer db.Close()
+
+	err := infrastructure.InitSchema(db)
+	assert.NoError(t, err)
+
+	// Verify tables exist
+	var count int
+	err = db.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='users'").Scan(&count)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, count)
+}
+
 func TestSQLiteConnection_Error(t *testing.T) {
 	// A completely bad path should fail during creation or ping
 	db, err := infrastructure.NewSQLiteDB("file:/this/path/does/not/exist.db")

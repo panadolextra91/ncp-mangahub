@@ -7,7 +7,8 @@ echo "==================================="
 
 # Run tests and output coverage profile
 export PATH="/opt/homebrew/bin:$PATH"
-go test -v -coverprofile=coverage.out ./internal/...
+# Scoping to internal and pkg modules
+go test -v -coverprofile=coverage.out ./internal/... ./pkg/... ./config/...
 
 echo ""
 echo "📊 Coverage Report:"
@@ -16,11 +17,11 @@ go tool cover -func=coverage.out
 echo "-----------------------------------"
 
 # Check if coverage is above the required 80%
-TOTAL_COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+TOTAL_COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}' | head -n 1)
 
 echo "Total Coverage: ${TOTAL_COVERAGE}%"
 
-# Simple bash float comparison workaround or integer check
+# Simple bash float comparison workaround
 COVERAGE_INT=$(echo $TOTAL_COVERAGE | cut -d'.' -f1)
 
 if [ "$COVERAGE_INT" -lt 80 ]; then

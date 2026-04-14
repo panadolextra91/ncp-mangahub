@@ -57,10 +57,12 @@ Implement the HTTP transport layer using Go 1.22+ standard library, integrate JW
 - .planning/phases/04-http-protocol-layer-core-api/04-RESEARCH.md
 </read_first>
 <action>
-1. Create `internal/interfaces/http/handlers.go`. Implement `AuthHandler`, `MangaHandler`, and `ProgressHandler`.
+1. Create `internal/interfaces/http/handlers.go`. Implement `AuthHandler`, `MangaHandler`, `ProgressHandler`, and `HealthHandler`.
 2. Handlers must parse JSON requests, call Application Services (from Phase 3), and return JSON responses.
 3. Handlers should extract `role` from the request `context` to pass as an argument to services.
-4. Create `internal/interfaces/http/router.go` utilizing `http.NewServeMux()` with Go 1.22+ patterns (e.g. `POST /api/manga`).
+4. `HealthHandler` should report system status (DB and EventBus status).
+5. Create `internal/interfaces/http/router.go` utilizing `http.NewServeMux()` with Go 1.22+ patterns (e.g. `POST /api/manga`).
+6. Register `GET /api/health` in the router.
 </action>
 <acceptance_criteria>
 - API endpoints correctly handle happy paths and return appropriate error codes for failures.

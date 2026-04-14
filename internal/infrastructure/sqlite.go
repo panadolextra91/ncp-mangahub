@@ -31,3 +31,37 @@ func NewSQLiteDB(dsn string) (*sql.DB, error) {
 
 	return db, nil
 }
+
+// InitSchema creates the necessary tables for MangaHub if they do not already exist.
+func InitSchema(db *sql.DB) error {
+	schema := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT UNIQUE NOT NULL,
+		password_hash TEXT NOT NULL,
+		role TEXT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS mangas (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		author TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE TABLE IF NOT EXISTS user_progress (
+		user_id INTEGER NOT NULL,
+		manga_id INTEGER NOT NULL,
+		current_chapter INTEGER NOT NULL,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (user_id, manga_id),
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (manga_id) REFERENCES mangas(id)
+	);
+	`
+	_, err := db.Exec(schema)
+	if err != nil {
+		return fmt.Errorf("failed to initialize schema: %w", err)
+	}
+	return nil
+}
