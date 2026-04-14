@@ -2,8 +2,10 @@ package tcp_test
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,7 +17,11 @@ import (
 func TestTCPProtocol(t *testing.T) {
 	secret := "test-secret"
 	hub := tcp.NewHub(2) // Max 2 clients for testing DOS
-	go hub.Run()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go hub.Run(ctx, &wg)
 
 	// Get a free port
 	listener, err := net.Listen("tcp", ":0")

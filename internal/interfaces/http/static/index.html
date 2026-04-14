@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangaHub | Premium Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-subtle-black text-slate-200">
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-max-w-md p-8 rounded-xl border border-pink-pastel/20">
+            <h2 class="text-2xl font-bold text-pink-pastel mb-6 text-center">🔐 MangaHub Admin</h2>
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="Username" class="pink-input w-full">
+                <input type="password" id="password" placeholder="Password" class="pink-input w-full">
+                <button id="login-btn" class="pink-button w-full">Enter Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-pink-pastel">MangaHub <span class="text-slate-500 font-light">Live</span></h1>
+                <p class="text-slate-400 mt-2">Modular Monolith Management Interface</p>
+            </div>
+            <div class="flex gap-4">
+                <button id="logout-btn" class="text-sm text-slate-500 hover:text-pink-pastel transition-colors">Logout</button>
+            </div>
+        </header>
+
+        <!-- Status Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12">
+            <div class="status-card" id="status-http">
+                <div class="led-indicator" id="led-http"></div>
+                <h3 class="status-label">HTTP</h3>
+                <p class="status-value">Ready</p>
+            </div>
+            <div class="status-card" id="status-tcp">
+                <div class="led-indicator" id="led-tcp"></div>
+                <h3 class="status-label">TCP</h3>
+                <p class="status-value">Listening</p>
+            </div>
+            <div class="status-card" id="status-udp">
+                <div class="led-indicator" id="led-udp"></div>
+                <h3 class="status-label">UDP</h3>
+                <p class="status-value">Registry Up</p>
+            </div>
+            <div class="status-card" id="status-ws">
+                <div class="led-indicator" id="led-ws"></div>
+                <h3 class="status-label">WS</h3>
+                <p class="status-value">Hub Active</p>
+            </div>
+            <div class="status-card" id="status-grpc">
+                <div class="led-indicator" id="led-grpc"></div>
+                <h3 class="status-label">gRPC</h3>
+                <p class="status-value">Services Up</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Col: Stats & Creation -->
+            <div class="space-y-8">
+                <section class="glass-card p-6">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <span class="text-pink-pastel">✨</span> New Release
+                    </h2>
+                    <form id="create-manga-form" class="space-y-4">
+                        <input type="text" id="manga-title" placeholder="Manga Title" class="pink-input">
+                        <input type="text" id="manga-author" placeholder="Author" class="pink-input">
+                        <textarea id="manga-desc" placeholder="Summary..." class="pink-input h-24"></textarea>
+                        <button type="submit" class="pink-button w-full">Broadcast Release</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Middle/Right Col: Feed & Chat -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Feed -->
+                <section class="glass-card p-6 h-[400px] flex flex-col">
+                    <h2 class="text-lg font-semibold mb-4 flex justify-between items-center">
+                        <span>📡 Live System Feed</span>
+                        <span class="text-xs text-slate-500" id="feed-status">Realtime Sync</span>
+                    </h2>
+                    <div id="event-feed" class="flex-grow overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+                        <div class="text-slate-600 italic text-sm">Waiting for system events...</div>
+                    </div>
+                </section>
+
+                <!-- Chat -->
+                <section class="glass-card p-6 h-[400px] flex flex-col">
+                    <h2 class="text-lg font-semibold mb-4">💬 Admin Comms (WebSocket)</h2>
+                    <div id="chat-messages" class="flex-grow overflow-y-auto space-y-3 mb-4 pr-2 scrollbar-thin">
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Type message..." class="pink-input flex-grow">
+                        <button id="send-chat-btn" class="pink-button px-6">Send</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast UI -->
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[100] space-y-4 flex flex-col items-end"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

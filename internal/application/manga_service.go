@@ -15,6 +15,7 @@ var (
 // MangaService bounds standard interactions shielding them from external APIs.
 type MangaService interface {
 	CreateManga(role string, manga *models.Manga) error
+	GetManga(id int) (*models.Manga, error)
 }
 
 type mangaService struct {
@@ -44,4 +45,8 @@ func (s *mangaService) CreateManga(role string, manga *models.Manga) error {
 	})
 
 	return nil
+}
+
+func (s *mangaService) GetManga(id int) (*models.Manga, error) {
+	return s.repo.FindByID(id)
 }

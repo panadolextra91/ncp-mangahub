@@ -1,10 +1,15 @@
 package http
 
 import (
+	"embed"
+	"io/fs"
 	"net/http"
 
 	"github.com/user/mangahub/internal/middleware"
 )
+
+//go:embed static/*
+var staticAssets embed.FS
 
 // SetupRouter configures the Go 1.22+ pattern-based router.
 func SetupRouter(
@@ -29,6 +34,14 @@ func SetupRouter(
 
 	// Progress routes
 	mux.Handle("PUT /api/manga/progress", authMiddleware(http.HandlerFunc(progH.Update)))
+
+	// Static Assets (Pink Dashboard)
+	staticSub, _ := fs.Sub(staticAssets, "static")
+	fileServer := http.FileServer(http.FS(staticSub))
+	
+	mux.Handle("GET /", fileServer)
+	mux.Handle("GET /style.css", fileServer)
+	mux.Handle("GET /app.js", fileServer)
 
 	return mux
 }

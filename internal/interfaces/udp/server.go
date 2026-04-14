@@ -42,6 +42,9 @@ func (s *Server) Start() error {
 	for {
 		n, clientAddr, err := conn.ReadFromUDP(buf)
 		if err != nil {
+			if strings.Contains(err.Error(), "use of closed network connection") {
+				return nil
+			}
 			log.Printf("UDP Read Error: %v", err)
 			continue
 		}

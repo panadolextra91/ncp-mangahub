@@ -1,0 +1,168 @@
+/* MangaHub Premium Aesthetic (Pink Pastel on Subtle Black) */
+
+:root {
+    --subtle-black: #0B0E11;
+    --card-bg: #161B22;
+    --pink-pastel: #FBCFE8;
+    --pink-glow: #F9A8D4;
+    --slate-200: #E2E8F0;
+    --slate-400: #94A3B8;
+    --slate-500: #64748B;
+    --border: rgba(251, 207, 232, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--subtle-black);
+    color: var(--slate-200);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.bg-subtle-black { background-color: var(--subtle-black); }
+.text-pink-pastel { color: var(--pink-pastel); }
+
+/* Glassmorphism Cards (Shadcn-mimic) */
+.glass-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Inputs (Shadcn-mimic) */
+.pink-input {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--slate-200);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.pink-input:focus {
+    border-color: var(--pink-pastel);
+    box-shadow: 0 0 0 2px rgba(251, 207, 232, 0.2);
+}
+
+/* Buttons (Shadcn-mimic) */
+.pink-button {
+    background-color: var(--pink-pastel);
+    color: var(--subtle-black);
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pink-button:hover {
+    transform: translateY(-1px);
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(251, 207, 232, 0.4);
+}
+
+.pink-button:active {
+    transform: translateY(0);
+}
+
+/* Status Cards & LED Indicators */
+.status-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(251, 207, 232, 0.4);
+}
+
+.led-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #334155; /* Default Gray-off */
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 0px var(--pink-glow);
+}
+
+/* THE GLOW EFFECT (Mẹ Architect requirement) */
+.led-glow {
+    background-color: var(--pink-pastel) !important;
+    box-shadow: 0 0 12px var(--pink-glow), 0 0 4px var(--pink-pastel) !important;
+}
+
+.status-label {
+    font-size: 0.75rem;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.status-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--slate-400);
+}
+
+/* Forms & Feeds */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+/* Utility */
+.fixed { position: fixed; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.z-50 { z-index: 50; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.bg-black\/80 { background-color: rgba(0, 0, 0, 0.8); }
+.backdrop-blur-sm { backdrop-filter: blur(4px); }
+.max-w-md { max-width: 28rem; }
+.p-8 { padding: 2rem; }
+.rounded-xl { border-radius: 0.75rem; }
+.border-pink-pastel\/20 { border-color: rgba(251, 207, 232, 0.2); }
+.text-2xl { font-size: 1.5rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.text-center { text-align: center; }
+.space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+.w-full { width: 100%; }
+
+/* Toast styles */
+.pink-toast {
+    background-color: var(--card-bg);
+    border-left: 4px solid var(--pink-pastel);
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 320px;
+    color: var(--slate-200);
+}
+
+@keyframes toast-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}

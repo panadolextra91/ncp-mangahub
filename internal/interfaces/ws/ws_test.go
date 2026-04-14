@@ -1,10 +1,12 @@
 package ws_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/gorilla/websocket"
@@ -28,7 +30,11 @@ func TestWebSocketProtocol(t *testing.T) {
 	repo := &mockChatRepo{}
 	svc := application.NewChatService(repo, bus)
 	hub := ws.NewHub()
-	go hub.Run()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go hub.Run(ctx, &wg)
 	handler := ws.NewChatHandler(hub, svc, secret)
 
 	s := httptest.NewServer(http.HandlerFunc(handler.HandleWS))

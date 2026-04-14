@@ -12,6 +12,7 @@ type Config struct {
 	Port           string
 	TCPPort        string
 	UDPPort        string
+	GRPCPort       string
 	MaxTCPClients  int
 }
 
@@ -43,6 +44,11 @@ func LoadConfig() *Config {
 		udpPort = "9191"
 	}
 
+	grpcPort := os.Getenv("GRPC_PORT")
+	if grpcPort == "" {
+		grpcPort = "50051"
+	}
+
 	maxClientsStr := os.Getenv("MAX_TCP_CLIENTS")
 	maxClients := 100
 	if val, err := strconv.Atoi(maxClientsStr); err == nil {
@@ -55,6 +61,7 @@ func LoadConfig() *Config {
 		Port:          port,
 		TCPPort:       tcpPort,
 		UDPPort:       udpPort,
+		GRPCPort:      grpcPort,
 		MaxTCPClients: maxClients,
 	}
 }

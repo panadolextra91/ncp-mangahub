@@ -10,14 +10,17 @@ export PATH="/opt/homebrew/bin:$PATH"
 # Scoping to internal and pkg modules
 go test -v -coverprofile=coverage.out ./internal/... ./pkg/... ./config/...
 
+# Exclude generated code from coverage analysis
+grep -v ".pb.go" coverage.out > coverage_filtered.out
+
 echo ""
-echo "📊 Coverage Report:"
+echo "📊 Coverage Report (excluding generated code):"
 echo "-----------------------------------"
-go tool cover -func=coverage.out
+go tool cover -func=coverage_filtered.out
 echo "-----------------------------------"
 
 # Check if coverage is above the required 80%
-TOTAL_COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}' | head -n 1)
+TOTAL_COVERAGE=$(go tool cover -func=coverage_filtered.out | grep total | awk '{print substr($3, 1, length($3)-1)}' | head -n 1)
 
 echo "Total Coverage: ${TOTAL_COVERAGE}%"
 

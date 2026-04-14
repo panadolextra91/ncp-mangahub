@@ -39,3 +39,13 @@
 ## Phase 10: Demo Integration & E2E Verification
 - **Goal:** Comprehensive E2E Testing of the full 5-protocol interaction flow. This phase must focus intensely on "hell paths" alongside the happy path (e.g., dropping SQLite lock, stalling TCP readers, malformed UDP packets, network partitioning).
 - **Depends on:** Phase 9
+
+### Phase 11: TUI and HTML interface
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 10
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 11 to break down)

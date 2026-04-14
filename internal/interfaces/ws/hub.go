@@ -1,7 +1,11 @@
 package ws
 
 import (
+	"context"
+	"fmt"
 	"sync"
+	"time"
+
 	"github.com/user/mangahub/pkg/models"
 )
 
@@ -38,9 +42,13 @@ func NewHub() *Hub {
 	}
 }
 
-func (h *Hub) Run() {
+func (h *Hub) Run(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
+		case <-ctx.Done():
+			h.stop()
+			return
 		case client := <-h.Register:
 			h.mu.Lock()
 			if h.rooms[client.MangaID] == nil {
@@ -76,5 +84,40 @@ func (h *Hub) Run() {
 			}
 			h.mu.RUnlock()
 		}
+	}
+}
+
+func (h *Hub) stop() {
+	fmt.Println("📡 WebSocket Hub: Shutting down and notifying clients...")
+	shutdownMsg := &models.ChatMessage{
+		MangaID:    0,
+		SenderName: "system",
+		Content:    `{"action": "shutdown", "reason": "server_maintenance"}`,
+	}
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	// Notify all clients in all rooms
+	for _, clients := range h.rooms {
+		for client := range clients {
+			select {
+			case client.Send <- shutdownMsg:
+			default:
+				// Skip if buffer full
+			}
+		}
+	}
+
+	// Grace period
+	time.Sleep(2 * time.Second)
+
+	// Force close all connections
+	for mangaID, clients := range h.rooms {
+		for client := range clients {
+			delete(clients, client)
+			close(client.Send)
+		}
+		delete(h.rooms, mangaID)
 	}
 }

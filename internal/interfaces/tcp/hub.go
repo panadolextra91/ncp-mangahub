@@ -1,8 +1,11 @@
 package tcp
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"sync"
+	"time"
 )
 
 // Hub manages the set of active TCP clients and broadcasts messages to them.
@@ -33,9 +36,13 @@ func NewHub(maxClients int) *Hub {
 	}
 }
 
-func (h *Hub) Run() {
+func (h *Hub) Run(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
+		case <-ctx.Done():
+			h.stop()
+			return
 		case conn := <-h.register:
 			// DOS Protection Check
 			if len(h.clients) >= h.maxClients {
@@ -70,4 +77,23 @@ func (h *Hub) Run() {
 // Broadcast sends a message to all registered clients.
 func (h *Hub) Broadcast(message []byte) {
 	h.broadcast <- message
+}
+
+func (h *Hub) stop() {
+	fmt.Println("📡 TCP Hub: Shutting down and notifying clients...")
+	shutdownMsg := `{"type": "system", "action": "shutdown", "reason": "server_maintenance"}`
+	
+	// Notify all clients
+	for conn := range h.clients {
+		fmt.Fprintf(conn, "%s\n", shutdownMsg)
+	}
+
+	// Grace period for clients to close themselves
+	time.Sleep(2 * time.Second)
+
+	// Force close any remaining
+	for conn := range h.clients {
+		conn.Close()
+		delete(h.clients, conn)
+	}
 }

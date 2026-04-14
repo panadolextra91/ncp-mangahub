@@ -1,9 +1,22 @@
 .gitnexus
 .DS_Store
-.gitnexus
 .agent
 .claude
 .codex
 .cursor
 AGENTS.md
 CLAUDE.md
+
+# Logs and Test Data
+*.log
+tests/e2e/server_*.log
+*.db
+*.db-shm
+*.db-wal
+
+# Coverage
+*.out
+
+# Binaries
+mangahub
+manga-cli
