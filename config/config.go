@@ -11,6 +11,7 @@ type Config struct {
 	DBPath         string
 	Port           string
 	TCPPort        string
+	UDPPort        string
 	MaxTCPClients  int
 }
 
@@ -37,6 +38,11 @@ func LoadConfig() *Config {
 		tcpPort = "9090"
 	}
 
+	udpPort := os.Getenv("UDP_PORT")
+	if udpPort == "" {
+		udpPort = "9191"
+	}
+
 	maxClientsStr := os.Getenv("MAX_TCP_CLIENTS")
 	maxClients := 100
 	if val, err := strconv.Atoi(maxClientsStr); err == nil {
@@ -48,6 +54,7 @@ func LoadConfig() *Config {
 		DBPath:        dbPath,
 		Port:          port,
 		TCPPort:       tcpPort,
+		UDPPort:       udpPort,
 		MaxTCPClients: maxClients,
 	}
 }

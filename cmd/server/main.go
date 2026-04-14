@@ -18,6 +18,7 @@ import (
 	"github.com/user/mangahub/internal/infrastructure"
 	mh_http "github.com/user/mangahub/internal/interfaces/http"
 	mh_tcp "github.com/user/mangahub/internal/interfaces/tcp"
+	mh_udp "github.com/user/mangahub/internal/interfaces/udp"
 	mh_ws "github.com/user/mangahub/internal/interfaces/ws"
 	"github.com/user/mangahub/pkg/models"
 )
@@ -55,6 +56,15 @@ func main() {
 	wsHub := mh_ws.NewHub()
 	go wsHub.Run()
 
+	// --- UDP ---
+	udpRegistry := mh_udp.NewRegistry(60*time.Second, 10*time.Second)
+	udpServer := mh_udp.NewServer(":"+cfg.UDPPort, udpRegistry, cfg.JWTSecret)
+	go func() {
+		if err := udpServer.Start(); err != nil {
+			log.Printf("UDP Server Error: %v", err)
+		}
+	}()
+
 	// 5. Initialize Repositories
 	userRepo := database.NewSqliteUserRepository(db)
 	mangaRepo := database.NewSqliteMangaRepository(db)
@@ -71,10 +81,20 @@ func main() {
 	bridge := func(ch <-chan models.Event) {
 		for event := range ch {
 			jsonData, _ := json.Marshal(event.Payload)
+			
+			// Broadcast to TCP Clients
 			tcpHub.Broadcast(jsonData)
 
+			// Broadcast to WebSocket Clients (if it's a ChatMessage)
 			if msg, ok := event.Payload.(*models.ChatMessage); ok {
 				wsHub.Broadcast <- msg
+			}
+
+			// Broadcast to UDP Clients (ONLY GLOBAL EVENTS per Mẹ Architect)
+			if event.Topic == "manga.new" {
+				// manga.new events in our system usually have a *Manga payload
+				// We broadcast to all UDP subscribers (mangaID=0)
+				udpServer.Broadcast(0, jsonData)
 			}
 		}
 	}
@@ -102,7 +122,8 @@ func main() {
 
 	// 9. Start HTTP Server
 	go func() {
-		fmt.Printf("🚀 MangaHub Core API (HTTP + WS) listening on port %s\n", cfg.Port)
+		fmt.Printf("🚀 MangaHub Core API (HTTP + WS + UDP) listening on port %s\n", cfg.Port)
+		fmt.Printf("📡 UDP Notification Server on port %s\n", cfg.UDPPort)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("HTTP Server Error: %v", err)
 		}
@@ -121,6 +142,8 @@ func main() {
 	if err := httpServer.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
+	
+	udpServer.Stop()
 
 	fmt.Println("👋 Cleanup complete. Goodbye!")
 }
