@@ -3,9 +3,12 @@ package http_test
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/user/mangahub/internal/adapters/database"
@@ -35,17 +38,68 @@ func TestHTTPIntegration(t *testing.T) {
 	authH := mh_http.NewAuthHandler(authSvc, secret)
 	mangaH := mh_http.NewMangaHandler(mangaSvc)
 	progH := mh_http.NewProgressHandler(progSvc)
-	healthH := mh_http.NewHealthHandler(db, bus)
+	// Ports "0" mean no listener is up on those addresses → TCP and gRPC
+	// probes fail predictably, exercising the degraded path without needing
+	// real protocol servers in the test. startedAt is 30s in the past so
+	// uptime_seconds is comfortably positive.
+	healthH := mh_http.NewHealthHandler(db, bus, "8080", "0", "0", "0", time.Now().Add(-30*time.Second))
 
 	mux := mh_http.SetupRouter(authH, mangaH, progH, healthH, secret)
 
 	// --- 1. Health Check ---
 	t.Run("Health Check", func(t *testing.T) {
+		// Capture log output to verify the user-required logging.
+		var logBuf bytes.Buffer
+		origOut := log.Writer()
+		log.SetOutput(&logBuf)
+		defer log.SetOutput(origOut)
+
 		req := httptest.NewRequest("GET", "/api/health", nil)
 		rr := httptest.NewRecorder()
 		mux.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Contains(t, rr.Body.String(), "MangaHub is alive")
+
+		// No real TCP/gRPC listeners on test ports → degraded → 503.
+		assert.Equal(t, http.StatusServiceUnavailable, rr.Code)
+
+		var resp map[string]interface{}
+		assert.NoError(t, json.Unmarshal(rr.Body.Bytes(), &resp))
+
+		// Top-level keys.
+		assert.Equal(t, "degraded", resp["status"])
+		assert.Contains(t, resp, "checks")
+		assert.Contains(t, resp, "bus")
+		assert.Contains(t, resp, "uptime_seconds")
+		assert.Contains(t, resp, "timestamp")
+
+		// All 6 check keys present.
+		checks, ok := resp["checks"].(map[string]interface{})
+		assert.True(t, ok, "checks should be a map")
+		for _, key := range []string{"http", "tcp", "udp", "ws", "grpc", "db"} {
+			assert.Contains(t, checks, key, "missing check: "+key)
+		}
+
+		// Self-checks and in-memory SQLite always pass.
+		assert.Equal(t, "ok", checks["http"])
+		assert.Equal(t, "ok", checks["ws"])
+		assert.Equal(t, "ok", checks["db"])
+
+		// Real protocol probes against port "0" must fail (TCP + gRPC are
+		// connection-oriented and will not find a listener). UDP is
+		// connectionless so we only assert non-emptiness — see note in plan.
+		tcpVal, _ := checks["tcp"].(string)
+		grpcVal, _ := checks["grpc"].(string)
+		assert.True(t, strings.HasPrefix(tcpVal, "error:"), "tcp should error, got: "+tcpVal)
+		assert.True(t, strings.HasPrefix(grpcVal, "error:"), "grpc should error, got: "+grpcVal)
+		assert.NotEmpty(t, checks["udp"], "udp probe should produce a result")
+
+		// Uptime is a positive number.
+		uptime, ok := resp["uptime_seconds"].(float64)
+		assert.True(t, ok && uptime > 0, "uptime_seconds should be positive number, got %v", resp["uptime_seconds"])
+
+		// Logging requirement (user explicit).
+		logs := logBuf.String()
+		assert.Contains(t, logs, "🩺 Health check from", "missing request log line")
+		assert.Contains(t, logs, "🩺 Health check result: status=degraded", "missing result log line")
 	})
 
 	// --- 2. Registration ---
