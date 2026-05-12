@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/user/mangahub/internal/application"
 	"github.com/user/mangahub/pkg/models"
 )
 
@@ -31,6 +33,11 @@ func (m *MockMangaService) ListMangas() ([]*models.Manga, error) {
 
 func (m *MockMangaService) SearchMangas(query string) ([]*models.Manga, error) {
 	args := m.Called(query)
+	return args.Get(0).([]*models.Manga), args.Error(1)
+}
+
+func (m *MockMangaService) SearchMangasWithFilters(f application.SearchFilters) ([]*models.Manga, error) {
+	args := m.Called(f)
 	return args.Get(0).([]*models.Manga), args.Error(1)
 }
 

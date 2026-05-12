@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/user/mangahub/internal/application"
+	"github.com/user/mangahub/internal/domain"
 	"github.com/user/mangahub/internal/eventbus"
 	"github.com/user/mangahub/pkg/models"
 )
@@ -41,6 +42,9 @@ func (m *mockMangaRepo) Save(manga *models.Manga) error {
 func (m *mockMangaRepo) FindByID(id int) (*models.Manga, error) { return nil, nil }
 func (m *mockMangaRepo) List() ([]*models.Manga, error)          { return nil, nil }
 func (m *mockMangaRepo) Search(q string) ([]*models.Manga, error) { return nil, nil }
+func (m *mockMangaRepo) SearchWithFilters(f domain.SearchFilters) ([]*models.Manga, error) {
+	return nil, nil
+}
 
 type mockProgressRepo struct{}
 

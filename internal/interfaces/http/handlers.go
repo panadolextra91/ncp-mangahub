@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/user/mangahub/internal/application"
@@ -108,15 +109,49 @@ func (h *MangaHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *MangaHandler) List(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query().Get("q")
+	qp := r.URL.Query()
+	q := qp.Get("q")
+	genresRaw := qp.Get("genres")
+	status := qp.Get("status")
+	sortBy := qp.Get("sortBy")
+
+	// Parse genres: comma-separated, trim whitespace, drop empties, cap at 10.
+	var genres []string
+	if genresRaw != "" {
+		for _, g := range strings.Split(genresRaw, ",") {
+			g = strings.TrimSpace(g)
+			if g == "" {
+				continue
+			}
+			genres = append(genres, g)
+			if len(genres) == 10 {
+				break
+			}
+		}
+	}
+
+	// Backwards compatibility: if NO new filters AND no sort change, route
+	// through the existing methods so q-only callers see bit-for-bit identical
+	// SQL semantics to the pre-WH7 behavior.
+	hasFilters := len(genres) > 0 || status != "" || (sortBy != "" && sortBy != "recent")
+
 	var mangas []*models.Manga
 	var err error
 
-	log.Printf("🔍 [SEARCH] Query: '%s'", q)
-	if q != "" {
-		mangas, err = h.mangaService.SearchMangas(q)
-	} else {
+	log.Printf("🔍 [SEARCH] q='%s' genres=%v status='%s' sortBy='%s'", q, genres, status, sortBy)
+
+	switch {
+	case !hasFilters && q == "":
 		mangas, err = h.mangaService.ListMangas()
+	case !hasFilters && q != "":
+		mangas, err = h.mangaService.SearchMangas(q)
+	default:
+		mangas, err = h.mangaService.SearchMangasWithFilters(application.SearchFilters{
+			Query:  q,
+			Genres: genres,
+			Status: status,
+			SortBy: sortBy,
+		})
 	}
 
 	if err != nil {
@@ -125,7 +160,7 @@ func (h *MangaHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("✅ [SEARCH] Found %d results for '%s'", len(mangas), q)
+	log.Printf("✅ [SEARCH] Found %d results", len(mangas))
 	json.NewEncoder(w).Encode(mangas)
 }
 

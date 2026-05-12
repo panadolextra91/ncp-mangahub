@@ -46,7 +46,23 @@ func (s *MangaService) GetManga(ctx context.Context, req *pb.GetMangaRequest) (*
 }
 
 func (s *MangaService) SearchManga(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponse, error) {
-	mangas, err := s.mangaSvc.SearchMangas(req.Query)
+	// Wire-level backwards compatibility: SearchRequest{query: "x"} alone must
+	// produce identical results to today. Route only through the new filtered
+	// path when one of the new fields is actually set.
+	hasFilters := len(req.Genres) > 0 || req.Status != "" || (req.SortBy != "" && req.SortBy != "recent")
+
+	var mangas []*models.Manga
+	var err error
+	if !hasFilters {
+		mangas, err = s.mangaSvc.SearchMangas(req.Query)
+	} else {
+		mangas, err = s.mangaSvc.SearchMangasWithFilters(application.SearchFilters{
+			Query:  req.Query,
+			Genres: req.Genres,
+			Status: req.Status,
+			SortBy: req.SortBy,
+		})
+	}
 	if err != nil {
 		return nil, err
 	}
