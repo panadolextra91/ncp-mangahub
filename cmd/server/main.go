@@ -32,6 +32,9 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	// Capture process start for /api/health uptime reporting.
+	startedAt := time.Now()
+
 	// 2. Initialize Roll Call (WAIT GROUP)
 	var wg sync.WaitGroup
 
@@ -178,7 +181,7 @@ func main() {
 	authH := mh_http.NewAuthHandler(authSvc, cfg.JWTSecret)
 	mangaH := mh_http.NewMangaHandler(mangaSvc)
 	progH := mh_http.NewProgressHandler(progSvc)
-	healthH := mh_http.NewHealthHandler(db, bus)
+	healthH := mh_http.NewHealthHandler(db, bus, cfg.Port, cfg.TCPPort, cfg.UDPPort, cfg.GRPCPort, startedAt)
 	wsH := mh_ws.NewChatHandler(wsHub, chatSvc, cfg.JWTSecret)
 	mux := mh_http.SetupRouter(authH, mangaH, progH, healthH, cfg.JWTSecret)
 	mux.HandleFunc("GET /api/chat", wsH.HandleWS)
