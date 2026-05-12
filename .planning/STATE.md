@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Final Verification
-last_updated: "2026-05-12T16:15:00.000Z"
+last_updated: "2026-05-12T16:40:00.000Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -51,5 +51,6 @@ See: `.planning/PROJECT.md`
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260512-w6i | Fix build failures in cmd/seed and demo so go build ./... and CI go green | 2026-05-12 | bfed747 | [260512-w6i-fix-build-failures-in-cmd-seed-and-demo-](./quick/260512-w6i-fix-build-failures-in-cmd-seed-and-demo-/) |
+| 260512-wh7 | Add advanced search and filtering to GET /api/manga (genres, status, sortBy) + mirror in gRPC SearchManga | 2026-05-12 | 5a44dcd | [260512-wh7-add-advanced-search-and-filtering-to-get](./quick/260512-wh7-add-advanced-search-and-filtering-to-get/) |
 
-Last activity: 2026-05-12 - Completed quick task 260512-w6i: Fix build failures in cmd/seed and demo
+Last activity: 2026-05-12 - Completed quick task 260512-wh7: Advanced search filters (bonus +5pt)
