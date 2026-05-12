@@ -91,7 +91,7 @@ func main() {
 			resp.Body.Close()
 
 			encoded := base64.StdEncoding.EncodeToString(imgData)
-			fmt.Println("\n✨ RENDERING IN ITERM2... ✨\n")
+			fmt.Print("\n✨ RENDERING IN ITERM2... ✨\n\n")
 			fmt.Printf("\033]1337;File=inline=1;width=80%%:%s\a\n", encoded)
 			fmt.Printf("\n📖 %s - CHAPTER %s\n", title, chap.Attributes.Chapter)
 			fmt.Println("✅ Success! You are reading live from MangaDex! 🌸")
