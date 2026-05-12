@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Final Verification
-last_updated: "2026-05-13T00:05:00.000Z"
+last_updated: "2026-05-13T00:15:00.000Z"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -53,5 +53,6 @@ See: `.planning/PROJECT.md`
 | 260512-w6i | Fix build failures in cmd/seed and demo so go build ./... and CI go green | 2026-05-12 | bfed747 | [260512-w6i-fix-build-failures-in-cmd-seed-and-demo-](./quick/260512-w6i-fix-build-failures-in-cmd-seed-and-demo-/) |
 | 260512-wh7 | Add advanced search and filtering to GET /api/manga (genres, status, sortBy) + mirror in gRPC SearchManga | 2026-05-12 | 5a44dcd | [260512-wh7-add-advanced-search-and-filtering-to-get](./quick/260512-wh7-add-advanced-search-and-filtering-to-get/) |
 | 260512-x52 | Update docs to reflect advanced search filters and feature parity between README.md and README-eng.md | 2026-05-13 | 47cad7a | [260512-x52-update-docs-to-reflect-advanced-search-f](./quick/260512-x52-update-docs-to-reflect-advanced-search-f/) |
+| 260513-032 | Extend /api/health to probe all 5 protocols + DB with logged per-subsystem status (bonus +5pt) | 2026-05-13 | 58dfa17 | [260513-032-extend-api-health-to-probe-all-5-protoco](./quick/260513-032-extend-api-health-to-probe-all-5-protoco/) |
 
-Last activity: 2026-05-13 - Completed quick task 260512-x52: Doc parity and accuracy refresh
+Last activity: 2026-05-13 - Completed quick task 260513-032: Multi-protocol health checks with logging (+5pt bonus)
