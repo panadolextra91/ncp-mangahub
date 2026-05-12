@@ -40,6 +40,7 @@ graph TD
     TUI --> WS
     TUI --> UDP
     CLI --> HTTP
+    CLI --> GRPC
 
     %% Flow: Adapters to Application
     HTTP --> AuthSvc
@@ -47,6 +48,7 @@ graph TD
     WS --> MangaSvc
     TCP --> MangaSvc
     GRPC --> AuthSvc
+    GRPC --> MangaSvc
 
     %% Flow: Application to Domain/Infra
     MangaSvc --> EventBus
@@ -55,6 +57,32 @@ graph TD
     EventBus -.-> UDP
     EventBus -.-> TCP
 ```
+
+## 📡 Protocol Lifecycle (Sequence View)
+
+Hệ thống MangaHub đặc thù ở chỗ phối hợp 5 giao thức trong một luồng nghiệp vụ duy nhất.
+
+### 🌟 Case: New Manga Release Flow
+Khi Admin tạo truyện, 3 giao thức sẽ cùng tham gia:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Admin as 🔑 Admin (TUI)
+    participant API as 🌐 HTTP API
+    participant Bus as 🚌 Event Bus
+    participant UDP as 📡 UDP Server
+    participant User as 📱 User (TUI)
+
+    Admin->>API: HTTP POST /api/manga
+    API->>API: Save to SQLite
+    API->>Bus: Emit "manga.new"
+    Bus-->>UDP: Notify UDP Module
+    UDP->>User: UDP Broadcast Notification
+    Note over User: TUI displays: "New Manga: Blue Lock!"
+```
+
+---
 
 ## 🛡️ Các Tầng Kiến Trúc
 
@@ -66,7 +94,7 @@ graph TD
 ### 2. Application Layer (`/internal/application`)
 - Chứa logic nghiệp vụ chính (Use Cases).
 - Điều phối dữ liệu giữa Domain và các Repository.
-- Sử dụng **Event Bus** để giao tiếp không đồng bộ giữa các module (ví dụ: Tạo Manga xong thì phát tin cho UDP Server).
+- Sử dụng **Event Bus** để giao tiếp không đồng bộ giữa các module.
 
 ### 3. Interface Adapters (`/internal/interfaces`)
 - Triển khai các giao thức giao tiếp (HTTP, gRPC, WebSocket, TCP, UDP).
@@ -77,18 +105,13 @@ graph TD
 - Triển khai chi tiết các Repository (SQLite).
 - Quản lý kết nối cơ sở dữ liệu và cấu hình hệ thống.
 
-## 📡 Multi-Protocol Flow
+---
 
-Khi một bộ truyện mới được tạo qua TUI:
-1. **TUI Client** gửi yêu cầu qua **HTTP POST**.
-2. **Manga Service** lưu vào **SQLite** và gửi một sự kiện vào **Event Bus**.
-3. **UDP Server** nhận sự kiện từ Bus và broadcast qua **UDP** đến tất cả TUI đang lắng nghe.
-4. **WebSocket Server** cho phép các Admin chat với nhau realtime về bộ truyện mới đó.
-5. **TCP Server** đảm bảo dữ liệu tiến độ đọc được đồng bộ ngay lập tức giữa các thiết bị.
-
-## 🛠️ Tech Stack
-- **Language**: Go 1.25+
-- **TUI Framework**: Bubbletea, Lipgloss (Charm Bracelet)
-- **Database**: SQLite (WAL Mode enabled)
-- **Security**: JWT Authentication (Custom claims)
-- **Real-time**: WebSockets & Raw TCP/UDP sockets
+## 🛠️ Tech Stack & Protocols
+- **Go 1.25+**: Ngôn ngữ chủ đạo.
+- **HTTP/1.1**: Quản lý Auth, CRUD Manga, Progress (Stateless).
+- **gRPC**: Quản trị hệ thống, Search nội bộ (High performance).
+- **WebSocket**: Chat cộng đồng (Real-time Full-duplex).
+- **Raw TCP**: Đồng bộ tiến độ đọc đa thiết bị (Stateful Sync).
+- **Raw UDP**: Thông báo sự kiện nhanh (Fire-and-forget Broadcast).
+- **Bubbletea & Lipgloss**: Xây dựng giao diện TUI hiện đại.

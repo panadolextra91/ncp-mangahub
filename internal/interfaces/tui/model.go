@@ -44,6 +44,7 @@ type Model struct {
 	Height      int
 	Error       string
 	FocusIndex  int // 0, 1, 2 for inputs
+	SearchIndex int // Scrolling index for search results
 	WS          *websocket.Conn
 	Stream      EventStream
 }

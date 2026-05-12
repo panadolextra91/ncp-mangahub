@@ -35,10 +35,36 @@ func (s *MangaService) GetManga(ctx context.Context, req *pb.GetMangaRequest) (*
 		return nil, err
 	}
 	return &pb.Manga{
-		Id:     int32(manga.ID),
-		Title:  manga.Title,
-		Author: manga.Author,
+		Id:            int32(manga.ID),
+		Title:         manga.Title,
+		Author:        manga.Author,
+		Description:   manga.Description,
+		Genres:        manga.Genres,
+		Status:        manga.Status,
+		TotalChapters: int32(manga.TotalChapters),
 	}, nil
+}
+
+func (s *MangaService) SearchManga(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponse, error) {
+	mangas, err := s.mangaSvc.SearchMangas(req.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	var pbMangas []*pb.Manga
+	for _, m := range mangas {
+		pbMangas = append(pbMangas, &pb.Manga{
+			Id:            int32(m.ID),
+			Title:         m.Title,
+			Author:        m.Author,
+			Description:   m.Description,
+			Genres:        m.Genres,
+			Status:        m.Status,
+			TotalChapters: int32(m.TotalChapters),
+		})
+	}
+
+	return &pb.SearchResponse{Mangas: pbMangas}, nil
 }
 
 func (s *MangaService) UpdateProgress(ctx context.Context, req *pb.UpdateProgressRequest) (*pb.UpdateProgressResponse, error) {
@@ -123,17 +149,25 @@ func (s *AdminService) CreateManga(ctx context.Context, req *pb.CreateMangaReque
 	}
 
 	manga := &models.Manga{
-		Title:  req.Title,
-		Author: req.Author,
+		Title:         req.Title,
+		Author:        req.Author,
+		Description:   req.Description,
+		Genres:        req.Genres,
+		Status:        req.Status,
+		TotalChapters: int(req.TotalChapters),
 	}
 	err := s.mangaSvc.CreateManga(claims.Role, manga)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.Manga{
-		Id:     int32(manga.ID),
-		Title:  manga.Title,
-		Author: manga.Author,
+		Id:            int32(manga.ID),
+		Title:         manga.Title,
+		Author:        manga.Author,
+		Description:   manga.Description,
+		Genres:        manga.Genres,
+		Status:        manga.Status,
+		TotalChapters: int32(manga.TotalChapters),
 	}, nil
 }
 

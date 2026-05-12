@@ -4,8 +4,8 @@
     "author": "Eiichiro Oda",
     "genres": "Action, Adventure, Fantasy",
     "status": "Ongoing",
-    "total_chapters": 1111,
-    "description": "Gol D. Roger was known as the 'Pirate King', the strongest and most infamous being to have sailed the Grand Line."
+    "total_chapters": 1114,
+    "description": "Gold Roger was known as the 'Pirate King', the strongest and most infamous being to have sailed the Grand Line."
   },
   {
     "title": "Naruto",
@@ -13,39 +13,31 @@
     "genres": "Action, Adventure, Fantasy",
     "status": "Completed",
     "total_chapters": 700,
-    "description": "Naruto Uzumaki is a young ninja who seeks recognition from his peers and dreams of becoming the Hokage."
+    "description": "Naruto Uzumaki is a young ninja who seeks gain recognition from his peers and also dreams of becoming the Hokage."
+  },
+  {
+    "title": "Bleach",
+    "author": "Tite Kubo",
+    "genres": "Action, Adventure, Supernatural",
+    "status": "Completed",
+    "total_chapters": 686,
+    "description": "Ichigo Kurosaki never asked for the ability to see ghosts — he was born with the gift."
   },
   {
     "title": "Dragon Ball",
     "author": "Akira Toriyama",
-    "genres": "Action, Adventure, Comedy, Sci-Fi",
+    "genres": "Action, Adventure, Fantasy",
     "status": "Completed",
     "total_chapters": 519,
-    "description": "Son Goku and Bulma embark on a quest to find the seven Dragon Balls."
+    "description": "Bulma is a girl in search of the mystical Dragonballs that when brought together grant any wish."
   },
   {
-    "title": "Berserk",
-    "author": "Kentaro Miura",
-    "genres": "Action, Adventure, Dark Fantasy",
-    "status": "Ongoing",
-    "total_chapters": 375,
-    "description": "Guts, a lone mercenary, travels across a medieval world while being hunted by demons."
-  },
-  {
-    "title": "Monster",
-    "author": "Naoki Urasawa",
-    "genres": "Mystery, Psychological, Thriller",
+    "title": "Attack on Titan",
+    "author": "Hajime Isayama",
+    "genres": "Action, Drama, Fantasy",
     "status": "Completed",
-    "total_chapters": 162,
-    "description": "Dr. Kenzo Tenma is a brilliant neurosurgeon whose life is turned upside down after saving a boy named Johan."
-  },
-  {
-    "title": "Fullmetal Alchemist",
-    "author": "Hiromu Arakawa",
-    "genres": "Action, Adventure, Steampunk",
-    "status": "Completed",
-    "total_chapters": 108,
-    "description": "Two brothers search for the Philosopher's Stone after a failed alchemical ritual."
+    "total_chapters": 139,
+    "description": "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called titans."
   },
   {
     "title": "Death Note",
@@ -53,15 +45,15 @@
     "genres": "Mystery, Psychological, Supernatural",
     "status": "Completed",
     "total_chapters": 108,
-    "description": "A high school student discovers a supernatural notebook that allows him to kill anyone by writing their name in it."
+    "description": "A shinigami, as a god of death, can kill any person—provided they see their victim's face and write their victim's name in a notebook called a Death Note."
   },
   {
-    "title": "Bleach",
-    "author": "Tite Kubo",
-    "genres": "Action, Supernatural",
+    "title": "Fullmetal Alchemist",
+    "author": "Hiromu Arakawa",
+    "genres": "Action, Adventure, Drama",
     "status": "Completed",
-    "total_chapters": 686,
-    "description": "Ichigo Kurosaki gains the powers of a Soul Reaper and must protect the human world from evil spirits."
+    "total_chapters": 108,
+    "description": "In an alchemical ritual gone wrong, Edward Elric loses his arm and his leg, and his brother Alphonse became nothing but a soul in a suit of armor."
   },
   {
     "title": "Hunter x Hunter",
@@ -69,103 +61,135 @@
     "genres": "Action, Adventure, Fantasy",
     "status": "Ongoing",
     "total_chapters": 400,
-    "description": "Gon Freecss sets out to become a Hunter and find his father."
+    "description": "Gon Freecss is a young boy who lives on Whale Island. He learns from 'Hunter' Kite that his father, whom he thought was dead, is actually alive and well."
   },
   {
-    "title": "Attack on Titan",
-    "author": "Hajime Isayama",
-    "genres": "Action, Dark Fantasy, Post-apocalyptic",
-    "status": "Completed",
-    "total_chapters": 139,
-    "description": "Humanity lives inside cities surrounded by enormous walls that protect them from Titans."
-  },
-  {
-    "title": "Jujutsu Kaisen",
-    "author": "Gege Akutami",
-    "genres": "Action, Supernatural",
+    "title": "One Punch Man",
+    "author": "ONE",
+    "genres": "Action, Comedy, Sci-Fi",
     "status": "Ongoing",
-    "total_chapters": 250,
-    "description": "Yuji Itadori joins a secret organization of Jujutsu Sorcerers to kill a powerful Curse."
-  },
-  {
-    "title": "Demon Slayer",
-    "author": "Koyoharu Gotouge",
-    "genres": "Action, Supernatural",
-    "status": "Completed",
-    "total_chapters": 205,
-    "description": "Tanjiro Kamado becomes a demon slayer to save his sister Nezuko."
+    "total_chapters": 202,
+    "description": "The seemingly ordinary and unimpressive Saitama has a rather unique hobby: being a hero."
   },
   {
     "title": "My Hero Academia",
     "author": "Kohei Horikoshi",
-    "genres": "Action, Superhero",
+    "genres": "Action, Adventure, Fantasy",
     "status": "Ongoing",
-    "total_chapters": 420,
-    "description": "Izuku Midoriya dreams of becoming a hero in a world where almost everyone has a Quirk."
+    "total_chapters": 422,
+    "description": "In a world where people with superpowers (known as 'Quirks') are the norm, Izuku Midoriya has dreams of one day becoming a Hero."
+  },
+  {
+    "title": "Demon Slayer",
+    "author": "Koyoharu Gotouge",
+    "genres": "Action, Supernatural, Fantasy",
+    "status": "Completed",
+    "total_chapters": 205,
+    "description": "Tanjiro Kamado's life is ruined when a demon kills his entire family and turns his sister into a demon."
+  },
+  {
+    "title": "Jujutsu Kaisen",
+    "author": "Gege Akutami",
+    "genres": "Action, Supernatural, Fantasy",
+    "status": "Ongoing",
+    "total_chapters": 259,
+    "description": "Yuji Itadori, a high school student, swallows a cursed finger to save his friends and becomes the host of Sukuna."
   },
   {
     "title": "Chainsaw Man",
     "author": "Tatsuki Fujimoto",
-    "genres": "Action, Dark Fantasy, Horror",
+    "genres": "Action, Supernatural, Drama",
     "status": "Ongoing",
-    "total_chapters": 160,
-    "description": "Denji, a young man who hunts devils, is transformed into Chainsaw Man."
+    "total_chapters": 164,
+    "description": "Denji, a poor young man, becomes the Chainsaw Man after merging with his pet devil dog, Pochita."
+  },
+  {
+    "title": "Spy x Family",
+    "author": "Tatsuya Endo",
+    "genres": "Action, Comedy, Slice of Life",
+    "status": "Ongoing",
+    "total_chapters": 98,
+    "description": "A spy, an assassin, and a telepath must act like a family for their own individual reasons."
+  },
+  {
+    "title": "Blue Lock",
+    "author": "Muneyuki Kaneshiro",
+    "genres": "Sports, Drama, Thriller",
+    "status": "Ongoing",
+    "total_chapters": 259,
+    "description": "Japan seeks to create the ultimate striker by putting 300 young forwards in a prison-like facility called Blue Lock."
+  },
+  {
+    "title": "Tokyo Revengers",
+    "author": "Ken Wakui",
+    "genres": "Action, Drama, Supernatural",
+    "status": "Completed",
+    "total_chapters": 278,
+    "description": "Takemichi Hanagaki travels back in time to save his middle school girlfriend from being killed by a gang."
+  },
+  {
+    "title": "Berserk",
+    "author": "Kentaro Miura",
+    "genres": "Action, Dark Fantasy, Seinen",
+    "status": "Ongoing",
+    "total_chapters": 376,
+    "description": "Guts, a lone mercenary, and Griffith, the leader of the Band of the Hawk, navigate a brutal world of demons and fate."
   },
   {
     "title": "Vagabond",
     "author": "Takehiko Inoue",
-    "genres": "Epic, Martial Arts",
-    "status": "Ongoing",
+    "genres": "Action, Historical, Martial Arts",
+    "status": "Hiatus",
     "total_chapters": 327,
-    "description": "A fictionalized account of the life of Japanese swordsman Musashi Miyamoto."
+    "description": "A fictionalized account of the life of the legendary Japanese swordsman Miyamoto Musashi."
+  },
+  {
+    "title": "Slam Dunk",
+    "author": "Takehiko Inoue",
+    "genres": "Sports, Comedy, Drama",
+    "status": "Completed",
+    "total_chapters": 276,
+    "description": "Hanamichi Sakuragi, a delinquent, joins the basketball team to impress a girl and discovers his passion for the sport."
+  },
+  {
+    "title": "Haikyuu!!",
+    "author": "Haruichi Furudate",
+    "genres": "Sports, Comedy, Drama",
+    "status": "Completed",
+    "total_chapters": 402,
+    "description": "Shoyo Hinata, a short high schooler, aims to become a great volleyball player like his idol, the 'Little Giant'."
+  },
+  {
+    "title": "Kingdom",
+    "author": "Yasuhisa Hara",
+    "genres": "Action, Historical, Military",
+    "status": "Ongoing",
+    "total_chapters": 795,
+    "description": "In ancient China, two orphans dream of becoming the 'Greatest Generals Under the Heavens'."
   },
   {
     "title": "Vinland Saga",
     "author": "Makoto Yukimura",
     "genres": "Action, Adventure, Historical",
     "status": "Ongoing",
-    "total_chapters": 200,
-    "description": "Thorfinn, a young Viking, seeks revenge against the man who killed his father."
+    "total_chapters": 210,
+    "description": "Thorfinn, a young Viking warrior, seeks revenge against the man who killed his father."
   },
   {
-    "title": "Kingdom",
-    "author": "Yasuhisa Hara",
-    "genres": "Epic, Historical, Military",
-    "status": "Ongoing",
-    "total_chapters": 780,
-    "description": "A fictionalized account of the Warring States period of ancient China."
-  },
-  {
-    "title": "Slam Dunk",
-    "author": "Takehiko Inoue",
-    "genres": "Comedy, Sports",
+    "title": "Monster",
+    "author": "Naoki Urasawa",
+    "genres": "Mystery, Psychological, Thriller",
     "status": "Completed",
-    "total_chapters": 276,
-    "description": "Hanamichi Sakuragi joins the Shohoku high school basketball team to impress a girl."
+    "total_chapters": 162,
+    "description": "Dr. Kenzo Tenma, a neurosurgeon, hunts down a former patient who has become a serial killer."
   },
   {
-    "title": "Haikyuu!!",
-    "author": "Haruichi Furudate",
-    "genres": "Comedy, Sports",
+    "title": "20th Century Boys",
+    "author": "Naoki Urasawa",
+    "genres": "Mystery, Sci-Fi, Psychological",
     "status": "Completed",
-    "total_chapters": 402,
-    "description": "Shoyo Hinata aims to become a great volleyball player despite his short stature."
-  },
-  {
-    "title": "Blue Lock",
-    "author": "Muneyuki Kaneshiro",
-    "genres": "Sports, Thriller",
-    "status": "Ongoing",
-    "total_chapters": 250,
-    "description": "Yoichi Isagi joins a revolutionary program to create the world's best striker."
-  },
-  {
-    "title": "Spy x Family",
-    "author": "Tatsuya Endo",
-    "genres": "Action, Comedy, Spy",
-    "status": "Ongoing",
-    "total_chapters": 95,
-    "description": "A spy must 'make a family' to execute a mission, but his daughter is a telepath and his wife is an assassin."
+    "total_chapters": 249,
+    "description": "A group of friends must stop a mysterious cult leader known as 'Friend' who is using their childhood stories to destroy the world."
   },
   {
     "title": "JoJo's Bizarre Adventure",
@@ -173,7 +197,7 @@
     "genres": "Action, Adventure, Supernatural",
     "status": "Ongoing",
     "total_chapters": 960,
-    "description": "The intergenerational story of the Joestar family and their battles against supernatural foes."
+    "description": "The multi-generational story of the Joestar family and their battles against supernatural foes."
   },
   {
     "title": "Fairy Tail",
@@ -181,7 +205,7 @@
     "genres": "Action, Adventure, Fantasy",
     "status": "Completed",
     "total_chapters": 545,
-    "description": "Lucy Heartfilia joins the Fairy Tail guild and embarks on adventures with Natsu Dragneel."
+    "description": "Lucy Heartfilia joins the chaotic Fairy Tail guild and embarks on magical adventures with Natsu Dragneel."
   },
   {
     "title": "Seven Deadly Sins",
@@ -189,47 +213,31 @@
     "genres": "Action, Adventure, Fantasy",
     "status": "Completed",
     "total_chapters": 346,
-    "description": "Elizabeth Liones searches for the Seven Deadly Sins to take back her kingdom."
+    "description": "Princess Elizabeth searches for the Seven Deadly Sins to help her take back her kingdom from the Holy Knights."
   },
   {
     "title": "Black Clover",
     "author": "Yuki Tabata",
-    "genres": "Action, Fantasy",
+    "genres": "Action, Adventure, Fantasy",
     "status": "Ongoing",
-    "total_chapters": 370,
-    "description": "Asta, a boy born without magic, aims to become the Wizard King."
+    "total_chapters": 372,
+    "description": "Asta, a boy born without magic in a world where magic is everything, aims to become the Wizard King."
   },
   {
-    "title": "Tokyo Ghoul",
-    "author": "Sui Ishida",
-    "genres": "Action, Dark Fantasy, Horror",
+    "title": "The Promised Neverland",
+    "author": "Kaiu Shirai",
+    "genres": "Mystery, Psychological, Sci-Fi",
     "status": "Completed",
-    "total_chapters": 143,
-    "description": "Ken Kaneki becomes a half-ghoul after a chance encounter with one."
+    "total_chapters": 181,
+    "description": "Orphans discover a terrifying secret about their orphanage and plan a daring escape."
   },
   {
-    "title": "D.Gray-man",
-    "author": "Katsura Hoshino",
-    "genres": "Action, Adventure, Dark Fantasy",
-    "status": "Ongoing",
-    "total_chapters": 250,
-    "description": "Allen Walker is an Exorcist who fights against the Millennium Earl."
-  },
-  {
-    "title": "Gintama",
-    "author": "Hideaki Sorachi",
-    "genres": "Action, Comedy, Sci-Fi",
+    "title": "Dr. Stone",
+    "author": "Riichiro Inagaki",
+    "genres": "Adventure, Sci-Fi, Shounen",
     "status": "Completed",
-    "total_chapters": 704,
-    "description": "Gintoki Sakata is a freelance samurai in an alternate Edo period where aliens have taken over."
-  },
-  {
-    "title": "Soul Eater",
-    "author": "Atsushi Ohkubo",
-    "genres": "Action, Adventure, Dark Fantasy",
-    "status": "Completed",
-    "total_chapters": 113,
-    "description": "Maka Albarn and her weapon partner Soul Eater Evans attend the Death Weapon Meister Academy."
+    "total_chapters": 232,
+    "description": "After humanity is turned to stone for thousands of years, a genius boy named Senku aims to rebuild civilization using science."
   },
   {
     "title": "Fire Force",
@@ -237,15 +245,47 @@
     "genres": "Action, Sci-Fi, Supernatural",
     "status": "Completed",
     "total_chapters": 304,
-    "description": "Shinra Kusakabe joins a special fire brigade to fight against spontaneous human combustion."
+    "description": "Special Fire Force units battle spontaneous human combustion and the mystery behind the Adolla Burst."
   },
   {
-    "title": "One Punch Man",
-    "author": "ONE",
-    "genres": "Action, Comedy, Superhero",
-    "status": "Ongoing",
-    "total_chapters": 200,
-    "description": "Saitama is a hero who can defeat any enemy with a single punch, but he's bored with his power."
+    "title": "Tokyo Ghoul",
+    "author": "Sui Ishida",
+    "genres": "Action, Horror, Supernatural",
+    "status": "Completed",
+    "total_chapters": 143,
+    "description": "Ken Kaneki becomes a half-ghoul after a surviving a run-in with one, and must navigate the world of ghouls and humans."
+  },
+  {
+    "title": "Gintama",
+    "author": "Hideaki Sorachi",
+    "genres": "Action, Comedy, Sci-Fi",
+    "status": "Completed",
+    "total_chapters": 704,
+    "description": "In an alternate Edo period occupied by aliens, samurai Gintoki Sakata takes on odd jobs to make a living."
+  },
+  {
+    "title": "Yu Yu Hakusho",
+    "author": "Yoshihiro Togashi",
+    "genres": "Action, Adventure, Supernatural",
+    "status": "Completed",
+    "total_chapters": 175,
+    "description": "Delinquent Yusuke Urameshi dies saving a child and is brought back to life as a Spirit Detective."
+  },
+  {
+    "title": "Rurouni Kenshin",
+    "author": "Nobuhiro Watsuki",
+    "genres": "Action, Historical, Romance",
+    "status": "Completed",
+    "total_chapters": 255,
+    "description": "A former assassin, Kenshin Himura, wanders Japan as a rurouni, helping people to atone for his past."
+  },
+  {
+    "title": "Inuyasha",
+    "author": "Rumiko Takahashi",
+    "genres": "Action, Adventure, Fantasy",
+    "status": "Completed",
+    "total_chapters": 558,
+    "description": "Kagome Higurashi is transported to feudal Japan where she joins the half-demon Inuyasha to recover the Shikon Jewel shards."
   },
   {
     "title": "Mob Psycho 100",
@@ -253,55 +293,87 @@
     "genres": "Action, Comedy, Supernatural",
     "status": "Completed",
     "total_chapters": 101,
-    "description": "Shigeo Kageyama is an esper with immense power who just wants a normal life."
+    "description": "Shigeo 'Mob' Kageyama, a powerful esper, tries to live a normal life while keeping his emotions under control."
   },
   {
-    "title": "Blue Exorcist",
-    "author": "Kazue Kato",
-    "genres": "Action, Supernatural",
-    "status": "Ongoing",
-    "total_chapters": 150,
-    "description": "Rin Okumura discovers he is the son of Satan and decides to become an exorcist."
-  },
-  {
-    "title": "Seraph of the End",
-    "author": "Takaya Kagami",
-    "genres": "Action, Dark Fantasy, Supernatural",
-    "status": "Ongoing",
-    "total_chapters": 130,
-    "description": "Humanity is enslaved by vampires after a mysterious virus kills most of the population."
-  },
-  {
-    "title": "Noragami",
-    "author": "Adachitoka",
-    "genres": "Action, Adventure, Supernatural",
+    "title": "Cowboy Bebop",
+    "author": "Hajime Yatate",
+    "genres": "Action, Sci-Fi, Space Western",
     "status": "Completed",
-    "total_chapters": 109,
-    "description": "Yato is a minor deity who dreams of having his own shrine."
+    "total_chapters": 11,
+    "description": "Bounty hunters Spike Spiegel and Jet Black travel the galaxy on their ship, the Bebop."
   },
   {
-    "title": "Oyasumi Punpun",
-    "author": "Inio Asano",
-    "genres": "Drama, Psychological",
+    "title": "Sailor Moon",
+    "author": "Naoko Takeuchi",
+    "genres": "Fantasy, Romance, Shoujo",
     "status": "Completed",
-    "total_chapters": 147,
-    "description": "The life of Punpun Onodera as he grows up and deals with dysfunctional family and relationships."
+    "total_chapters": 60,
+    "description": "Usagi Tsukino discovers she is Sailor Moon and leads a group of Sailor Guardians to protect the Earth."
   },
   {
-    "title": "Solanin",
-    "author": "Inio Asano",
-    "genres": "Drama, Slice of Life",
+    "title": "Cardcaptor Sakura",
+    "author": "CLAMP",
+    "genres": "Adventure, Fantasy, Romance",
     "status": "Completed",
-    "total_chapters": 28,
-    "description": "Two recent college graduates struggle to find their place in the world."
+    "total_chapters": 50,
+    "description": "Sakura Kinomoto accidentally releases magical Clow Cards and must recapture them to prevent disaster."
   },
   {
-    "title": "Goodnight Punpun",
-    "author": "Inio Asano",
-    "genres": "Drama, Psychological",
+    "title": "Fruit Basket",
+    "author": "Natsuki Takaya",
+    "genres": "Comedy, Drama, Romance",
     "status": "Completed",
-    "total_chapters": 147,
-    "description": "A coming-of-age story about a young boy named Punpun."
+    "total_chapters": 136,
+    "description": "Tohru Honda lives with the Sohma family and discovers they are cursed to turn into animals of the Chinese Zodiac."
+  },
+  {
+    "title": "Nana",
+    "author": "Ai Yazawa",
+    "genres": "Drama, Music, Romance",
+    "status": "Hiatus",
+    "total_chapters": 84,
+    "description": "Two girls both named Nana meet on a train to Tokyo and become close friends while pursuing their dreams."
+  },
+  {
+    "title": "Your Lie in April",
+    "author": "Naoshi Arakawa",
+    "genres": "Drama, Music, Romance",
+    "status": "Completed",
+    "total_chapters": 44,
+    "description": "A piano prodigy who lost his ability to play after his mother's death is inspired by a free-spirited violinist."
+  },
+  {
+    "title": "A Silent Voice",
+    "author": "Yoshitoki Oima",
+    "genres": "Drama, Romance, Slice of Life",
+    "status": "Completed",
+    "total_chapters": 64,
+    "description": "A former bully seeks redemption by befriending the deaf girl he once tormented."
+  },
+  {
+    "title": "Horimiya",
+    "author": "HERO",
+    "genres": "Comedy, Romance, Slice of Life",
+    "status": "Completed",
+    "total_chapters": 125,
+    "description": "Two high school students with hidden sides discover each other's secrets and fall in love."
+  },
+  {
+    "title": "Kaguya-sama: Love is War",
+    "author": "Aka Akasaka",
+    "genres": "Comedy, Romance, Psychological",
+    "status": "Completed",
+    "total_chapters": 281,
+    "description": "Two brilliant student council members engage in a battle of wits to make the other confess their love first."
+  },
+  {
+    "title": "Great Teacher Onizuka",
+    "author": "Toru Fujisawa",
+    "genres": "Comedy, Drama, Shounen",
+    "status": "Completed",
+    "total_chapters": 200,
+    "description": "A former gang member becomes a teacher to fulfill his own unique brand of justice and guidance."
   },
   {
     "title": "Akira",
@@ -318,5 +390,93 @@
     "status": "Completed",
     "total_chapters": 11,
     "description": "Major Motoko Kusanagi and her team investigate cybercrimes in a futuristic world."
+  },
+  {
+    "title": "Parasyte",
+    "author": "Hitoshi Iwaaki",
+    "genres": "Action, Horror, Sci-Fi",
+    "status": "Completed",
+    "total_chapters": 64,
+    "description": "Alien parasites arrive on Earth, taking over human brains, but one fails and ends up in Shinichi Izumi's hand."
+  },
+  {
+    "title": "Uzumaki",
+    "author": "Junji Ito",
+    "genres": "Horror, Mystery, Supernatural",
+    "status": "Completed",
+    "total_chapters": 20,
+    "description": "A town becomes obsessed and haunted by spiral patterns that slowly consume everything."
+  },
+  {
+    "title": "Gantz",
+    "author": "Hiroya Oku",
+    "genres": "Action, Horror, Sci-Fi",
+    "status": "Completed",
+    "total_chapters": 383,
+    "description": "People who die are resurrected by a black sphere and forced to fight alien monsters in a deadly game."
+  },
+  {
+    "title": "Deadman Wonderland",
+    "author": "Jinsei Kataoka",
+    "genres": "Action, Horror, Sci-Fi",
+    "status": "Completed",
+    "total_chapters": 58,
+    "description": "Ganta Igarashi is wrongly accused of murdering his classmates and sent to a brutal prison amusement park."
+  },
+  {
+    "title": "Elfen Lied",
+    "author": "Lynn Okamoto",
+    "genres": "Action, Drama, Horror",
+    "status": "Completed",
+    "total_chapters": 107,
+    "description": "A mutant girl with deadly invisible arms escapes a research facility, leaving a trail of blood."
+  },
+  {
+    "title": "Claymore",
+    "author": "Norihiro Yagi",
+    "genres": "Action, Adventure, Fantasy",
+    "status": "Completed",
+    "total_chapters": 155,
+    "description": "Female warriors infused with demon blood hunt down monsters known as Yoma in a medieval world."
+  },
+  {
+    "title": "Blue Exorcist",
+    "author": "Kazue Kato",
+    "genres": "Action, Supernatural, Fantasy",
+    "status": "Ongoing",
+    "total_chapters": 145,
+    "description": "Rin Okumura discovers he is the son of Satan and decides to become an exorcist to defeat his father."
+  },
+  {
+    "title": "D.Gray-man",
+    "author": "Katsura Hoshino",
+    "genres": "Action, Adventure, Supernatural",
+    "status": "Ongoing",
+    "total_chapters": 250,
+    "description": "Allen Walker and other Exorcists fight against the Millennium Earl and his army of Akuma."
+  },
+  {
+    "title": "Soul Eater",
+    "author": "Atsushi Ohkubo",
+    "genres": "Action, Comedy, Supernatural",
+    "status": "Completed",
+    "total_chapters": 113,
+    "description": "Students at a special academy hunt down evil souls to turn their partners into powerful Death Scythes."
+  },
+  {
+    "title": "Noragami",
+    "author": "Adachitoka",
+    "genres": "Action, Adventure, Supernatural",
+    "status": "Completed",
+    "total_chapters": 109,
+    "description": "A minor god named Yato seeks to become a famous deity with his own shrine."
+  },
+  {
+    "title": "Magi: The Labyrinth of Magic",
+    "author": "Shinobu Ohtaka",
+    "genres": "Action, Adventure, Fantasy",
+    "status": "Completed",
+    "total_chapters": 369,
+    "description": "Aladdin and Alibaba explore magical dungeons and discover their destiny in a world of djinns."
   }
 ]

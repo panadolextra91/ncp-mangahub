@@ -14,6 +14,9 @@ message Manga {
     string title = 2;
     string author = 3;
     string description = 4;
+    string genres = 5;
+    string status = 6;
+    int32 total_chapters = 7;
 }
 
 message UserProgress {
@@ -34,6 +37,14 @@ message GetMangaRequest {
     int32 id = 1;
 }
 
+message SearchRequest {
+    string query = 1;
+}
+
+message SearchResponse {
+    repeated Manga mangas = 1;
+}
+
 message UpdateProgressRequest {
     int32 manga_id = 1;
     int32 chapter = 2;
@@ -48,6 +59,9 @@ message CreateMangaRequest {
     string title = 1;
     string author = 2;
     string description = 3;
+    string genres = 4;
+    string status = 5;
+    int32 total_chapters = 6;
 }
 
 message DeleteMangaRequest {
@@ -63,6 +77,7 @@ message DeleteMangaResponse {
 service MangaService {
     // User functions
     rpc GetManga(GetMangaRequest) returns (Manga);
+    rpc SearchManga(SearchRequest) returns (SearchResponse);
     rpc UpdateProgress(UpdateProgressRequest) returns (UpdateProgressResponse);
     
     // Real-time Event Streaming (Server-side)

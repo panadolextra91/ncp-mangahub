@@ -127,8 +127,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		} else if m.ActivePage == PageSearch {
 			if msg.String() == "enter" {
+				m.SearchIndex = 0 // Reset scroll on new search
 				return m, m.SearchMangaCmd()
 			}
+			if msg.String() == "up" && m.SearchIndex > 0 {
+				m.SearchIndex--
+			} else if msg.String() == "down" && m.SearchIndex < len(m.SearchResults)-1 {
+				m.SearchIndex++
+			}
+
 			if msg.String() == "space" {
 				m.SearchInput += " "
 			} else if len(msg.String()) == 1 {
@@ -264,8 +271,34 @@ func (m Model) View() string {
 			f(1, "Chapter ", m.ChapterInput),
 			f(2, "Status  ", m.StatusInput))
 	case PageSearch:
-		results := strings.Join(m.SearchResults, "\n")
-		content = fmt.Sprintf("🔍 SEARCH MANGA\n\nQuery: %s_\n\n(Press Enter to Search)\n\nRESULTS:\nID\tTITLE\t\t\t\t\tCHAPS\tSTATUS\n%s", m.SearchInput, results)
+		windowSize := 12
+		start := m.SearchIndex - windowSize/2
+		if start < 0 { start = 0 }
+		end := start + windowSize
+		if end > len(m.SearchResults) {
+			end = len(m.SearchResults)
+			start = end - windowSize
+			if start < 0 { start = 0 }
+		}
+
+		var displayedResults []string
+		for i := start; i < end; i++ {
+			row := m.SearchResults[i]
+			if i == m.SearchIndex {
+				displayedResults = append(displayedResults, lipgloss.NewStyle().Foreground(PinkPastel).Bold(true).Render("> " + row))
+			} else {
+				displayedResults = append(displayedResults, "  " + row)
+			}
+		}
+
+		results := strings.Join(displayedResults, "\n")
+		scrollInfo := ""
+		if len(m.SearchResults) > 0 {
+			scrollInfo = fmt.Sprintf("\n\n(Showing %d-%d of %d | Up/Down to Scroll)", start+1, end, len(m.SearchResults))
+		}
+
+		content = fmt.Sprintf("🔍 SEARCH MANGA\n\nQuery: %s_\n\n(Press Enter to Search)\n\nRESULTS:\n  ID\tTITLE\t\t\t\t\tCHAPS\tSTATUS\n%s%s", 
+			m.SearchInput, results, scrollInfo)
 	}
 
 	// Tabs

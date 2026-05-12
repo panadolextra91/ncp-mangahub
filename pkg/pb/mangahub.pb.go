@@ -29,6 +29,9 @@ type Manga struct {
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Author        string                 `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Genres        string                 `protobuf:"bytes,5,opt,name=genres,proto3" json:"genres,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	TotalChapters int32                  `protobuf:"varint,7,opt,name=total_chapters,json=totalChapters,proto3" json:"total_chapters,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -89,6 +92,27 @@ func (x *Manga) GetDescription() string {
 		return x.Description
 	}
 	return ""
+}
+
+func (x *Manga) GetGenres() string {
+	if x != nil {
+		return x.Genres
+	}
+	return ""
+}
+
+func (x *Manga) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Manga) GetTotalChapters() int32 {
+	if x != nil {
+		return x.TotalChapters
+	}
+	return 0
 }
 
 type UserProgress struct {
@@ -255,6 +279,94 @@ func (x *GetMangaRequest) GetId() int32 {
 	return 0
 }
 
+type SearchRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchRequest) Reset() {
+	*x = SearchRequest{}
+	mi := &file_api_proto_mangahub_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchRequest) ProtoMessage() {}
+
+func (x *SearchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_mangahub_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchRequest.ProtoReflect.Descriptor instead.
+func (*SearchRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SearchRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+type SearchResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Mangas        []*Manga               `protobuf:"bytes,1,rep,name=mangas,proto3" json:"mangas,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchResponse) Reset() {
+	*x = SearchResponse{}
+	mi := &file_api_proto_mangahub_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchResponse) ProtoMessage() {}
+
+func (x *SearchResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_mangahub_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchResponse.ProtoReflect.Descriptor instead.
+func (*SearchResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SearchResponse) GetMangas() []*Manga {
+	if x != nil {
+		return x.Mangas
+	}
+	return nil
+}
+
 type UpdateProgressRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MangaId       int32                  `protobuf:"varint,1,opt,name=manga_id,json=mangaId,proto3" json:"manga_id,omitempty"`
@@ -265,7 +377,7 @@ type UpdateProgressRequest struct {
 
 func (x *UpdateProgressRequest) Reset() {
 	*x = UpdateProgressRequest{}
-	mi := &file_api_proto_mangahub_proto_msgTypes[4]
+	mi := &file_api_proto_mangahub_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -277,7 +389,7 @@ func (x *UpdateProgressRequest) String() string {
 func (*UpdateProgressRequest) ProtoMessage() {}
 
 func (x *UpdateProgressRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_mangahub_proto_msgTypes[4]
+	mi := &file_api_proto_mangahub_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -290,7 +402,7 @@ func (x *UpdateProgressRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProgressRequest.ProtoReflect.Descriptor instead.
 func (*UpdateProgressRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{4}
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UpdateProgressRequest) GetMangaId() int32 {
@@ -317,7 +429,7 @@ type UpdateProgressResponse struct {
 
 func (x *UpdateProgressResponse) Reset() {
 	*x = UpdateProgressResponse{}
-	mi := &file_api_proto_mangahub_proto_msgTypes[5]
+	mi := &file_api_proto_mangahub_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -329,7 +441,7 @@ func (x *UpdateProgressResponse) String() string {
 func (*UpdateProgressResponse) ProtoMessage() {}
 
 func (x *UpdateProgressResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_mangahub_proto_msgTypes[5]
+	mi := &file_api_proto_mangahub_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -342,7 +454,7 @@ func (x *UpdateProgressResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProgressResponse.ProtoReflect.Descriptor instead.
 func (*UpdateProgressResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{5}
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateProgressResponse) GetSuccess() bool {
@@ -364,13 +476,16 @@ type CreateMangaRequest struct {
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Author        string                 `protobuf:"bytes,2,opt,name=author,proto3" json:"author,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Genres        string                 `protobuf:"bytes,4,opt,name=genres,proto3" json:"genres,omitempty"`
+	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	TotalChapters int32                  `protobuf:"varint,6,opt,name=total_chapters,json=totalChapters,proto3" json:"total_chapters,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateMangaRequest) Reset() {
 	*x = CreateMangaRequest{}
-	mi := &file_api_proto_mangahub_proto_msgTypes[6]
+	mi := &file_api_proto_mangahub_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -382,7 +497,7 @@ func (x *CreateMangaRequest) String() string {
 func (*CreateMangaRequest) ProtoMessage() {}
 
 func (x *CreateMangaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_mangahub_proto_msgTypes[6]
+	mi := &file_api_proto_mangahub_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -395,7 +510,7 @@ func (x *CreateMangaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMangaRequest.ProtoReflect.Descriptor instead.
 func (*CreateMangaRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{6}
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CreateMangaRequest) GetTitle() string {
@@ -419,6 +534,27 @@ func (x *CreateMangaRequest) GetDescription() string {
 	return ""
 }
 
+func (x *CreateMangaRequest) GetGenres() string {
+	if x != nil {
+		return x.Genres
+	}
+	return ""
+}
+
+func (x *CreateMangaRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *CreateMangaRequest) GetTotalChapters() int32 {
+	if x != nil {
+		return x.TotalChapters
+	}
+	return 0
+}
+
 type DeleteMangaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -428,7 +564,7 @@ type DeleteMangaRequest struct {
 
 func (x *DeleteMangaRequest) Reset() {
 	*x = DeleteMangaRequest{}
-	mi := &file_api_proto_mangahub_proto_msgTypes[7]
+	mi := &file_api_proto_mangahub_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -440,7 +576,7 @@ func (x *DeleteMangaRequest) String() string {
 func (*DeleteMangaRequest) ProtoMessage() {}
 
 func (x *DeleteMangaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_mangahub_proto_msgTypes[7]
+	mi := &file_api_proto_mangahub_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -453,7 +589,7 @@ func (x *DeleteMangaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMangaRequest.ProtoReflect.Descriptor instead.
 func (*DeleteMangaRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{7}
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteMangaRequest) GetId() int32 {
@@ -472,7 +608,7 @@ type DeleteMangaResponse struct {
 
 func (x *DeleteMangaResponse) Reset() {
 	*x = DeleteMangaResponse{}
-	mi := &file_api_proto_mangahub_proto_msgTypes[8]
+	mi := &file_api_proto_mangahub_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -484,7 +620,7 @@ func (x *DeleteMangaResponse) String() string {
 func (*DeleteMangaResponse) ProtoMessage() {}
 
 func (x *DeleteMangaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_mangahub_proto_msgTypes[8]
+	mi := &file_api_proto_mangahub_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -497,7 +633,7 @@ func (x *DeleteMangaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMangaResponse.ProtoReflect.Descriptor instead.
 func (*DeleteMangaResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{8}
+	return file_api_proto_mangahub_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DeleteMangaResponse) GetSuccess() bool {
@@ -511,12 +647,15 @@ var File_api_proto_mangahub_proto protoreflect.FileDescriptor
 
 const file_api_proto_mangahub_proto_rawDesc = "" +
 	"\n" +
-	"\x18api/proto/mangahub.proto\x12\vmangahub.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"g\n" +
+	"\x18api/proto/mangahub.proto\x12\vmangahub.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x01\n" +
 	"\x05Manga\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
 	"\x06author\x18\x03 \x01(\tR\x06author\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\"\x87\x01\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06genres\x18\x05 \x01(\tR\x06genres\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12%\n" +
+	"\x0etotal_chapters\x18\a \x01(\x05R\rtotalChapters\"\x87\x01\n" +
 	"\fUserProgress\x12\x19\n" +
 	"\bmanga_id\x18\x01 \x01(\x05R\amangaId\x12!\n" +
 	"\flast_chapter\x18\x02 \x01(\x05R\vlastChapter\x129\n" +
@@ -527,23 +666,31 @@ const file_api_proto_mangahub_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x128\n" +
 	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"!\n" +
 	"\x0fGetMangaRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"L\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"%\n" +
+	"\rSearchRequest\x12\x14\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\"<\n" +
+	"\x0eSearchResponse\x12*\n" +
+	"\x06mangas\x18\x01 \x03(\v2\x12.mangahub.v1.MangaR\x06mangas\"L\n" +
 	"\x15UpdateProgressRequest\x12\x19\n" +
 	"\bmanga_id\x18\x01 \x01(\x05R\amangaId\x12\x18\n" +
 	"\achapter\x18\x02 \x01(\x05R\achapter\"L\n" +
 	"\x16UpdateProgressResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"d\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xbb\x01\n" +
 	"\x12CreateMangaRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
 	"\x06author\x18\x02 \x01(\tR\x06author\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"$\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06genres\x18\x04 \x01(\tR\x06genres\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12%\n" +
+	"\x0etotal_chapters\x18\x06 \x01(\x05R\rtotalChapters\"$\n" +
 	"\x12DeleteMangaRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"/\n" +
 	"\x13DeleteMangaResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xf4\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbc\x02\n" +
 	"\fMangaService\x12<\n" +
-	"\bGetManga\x12\x1c.mangahub.v1.GetMangaRequest\x1a\x12.mangahub.v1.Manga\x12Y\n" +
+	"\bGetManga\x12\x1c.mangahub.v1.GetMangaRequest\x1a\x12.mangahub.v1.Manga\x12F\n" +
+	"\vSearchManga\x12\x1a.mangahub.v1.SearchRequest\x1a\x1b.mangahub.v1.SearchResponse\x12Y\n" +
 	"\x0eUpdateProgress\x12\".mangahub.v1.UpdateProgressRequest\x1a#.mangahub.v1.UpdateProgressResponse\x12K\n" +
 	"\x0fSubscribeEvents\x12\x16.google.protobuf.Empty\x1a\x1e.mangahub.v1.EventNotification0\x012\xa4\x01\n" +
 	"\fAdminService\x12B\n" +
@@ -562,38 +709,43 @@ func file_api_proto_mangahub_proto_rawDescGZIP() []byte {
 	return file_api_proto_mangahub_proto_rawDescData
 }
 
-var file_api_proto_mangahub_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_api_proto_mangahub_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_api_proto_mangahub_proto_goTypes = []any{
 	(*Manga)(nil),                  // 0: mangahub.v1.Manga
 	(*UserProgress)(nil),           // 1: mangahub.v1.UserProgress
 	(*EventNotification)(nil),      // 2: mangahub.v1.EventNotification
 	(*GetMangaRequest)(nil),        // 3: mangahub.v1.GetMangaRequest
-	(*UpdateProgressRequest)(nil),  // 4: mangahub.v1.UpdateProgressRequest
-	(*UpdateProgressResponse)(nil), // 5: mangahub.v1.UpdateProgressResponse
-	(*CreateMangaRequest)(nil),     // 6: mangahub.v1.CreateMangaRequest
-	(*DeleteMangaRequest)(nil),     // 7: mangahub.v1.DeleteMangaRequest
-	(*DeleteMangaResponse)(nil),    // 8: mangahub.v1.DeleteMangaResponse
-	(*timestamppb.Timestamp)(nil),  // 9: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),          // 10: google.protobuf.Empty
+	(*SearchRequest)(nil),          // 4: mangahub.v1.SearchRequest
+	(*SearchResponse)(nil),         // 5: mangahub.v1.SearchResponse
+	(*UpdateProgressRequest)(nil),  // 6: mangahub.v1.UpdateProgressRequest
+	(*UpdateProgressResponse)(nil), // 7: mangahub.v1.UpdateProgressResponse
+	(*CreateMangaRequest)(nil),     // 8: mangahub.v1.CreateMangaRequest
+	(*DeleteMangaRequest)(nil),     // 9: mangahub.v1.DeleteMangaRequest
+	(*DeleteMangaResponse)(nil),    // 10: mangahub.v1.DeleteMangaResponse
+	(*timestamppb.Timestamp)(nil),  // 11: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),          // 12: google.protobuf.Empty
 }
 var file_api_proto_mangahub_proto_depIdxs = []int32{
-	9,  // 0: mangahub.v1.UserProgress.updated_at:type_name -> google.protobuf.Timestamp
-	9,  // 1: mangahub.v1.EventNotification.timestamp:type_name -> google.protobuf.Timestamp
-	3,  // 2: mangahub.v1.MangaService.GetManga:input_type -> mangahub.v1.GetMangaRequest
-	4,  // 3: mangahub.v1.MangaService.UpdateProgress:input_type -> mangahub.v1.UpdateProgressRequest
-	10, // 4: mangahub.v1.MangaService.SubscribeEvents:input_type -> google.protobuf.Empty
-	6,  // 5: mangahub.v1.AdminService.CreateManga:input_type -> mangahub.v1.CreateMangaRequest
-	7,  // 6: mangahub.v1.AdminService.DeleteManga:input_type -> mangahub.v1.DeleteMangaRequest
-	0,  // 7: mangahub.v1.MangaService.GetManga:output_type -> mangahub.v1.Manga
-	5,  // 8: mangahub.v1.MangaService.UpdateProgress:output_type -> mangahub.v1.UpdateProgressResponse
-	2,  // 9: mangahub.v1.MangaService.SubscribeEvents:output_type -> mangahub.v1.EventNotification
-	0,  // 10: mangahub.v1.AdminService.CreateManga:output_type -> mangahub.v1.Manga
-	8,  // 11: mangahub.v1.AdminService.DeleteManga:output_type -> mangahub.v1.DeleteMangaResponse
-	7,  // [7:12] is the sub-list for method output_type
-	2,  // [2:7] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	11, // 0: mangahub.v1.UserProgress.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 1: mangahub.v1.EventNotification.timestamp:type_name -> google.protobuf.Timestamp
+	0,  // 2: mangahub.v1.SearchResponse.mangas:type_name -> mangahub.v1.Manga
+	3,  // 3: mangahub.v1.MangaService.GetManga:input_type -> mangahub.v1.GetMangaRequest
+	4,  // 4: mangahub.v1.MangaService.SearchManga:input_type -> mangahub.v1.SearchRequest
+	6,  // 5: mangahub.v1.MangaService.UpdateProgress:input_type -> mangahub.v1.UpdateProgressRequest
+	12, // 6: mangahub.v1.MangaService.SubscribeEvents:input_type -> google.protobuf.Empty
+	8,  // 7: mangahub.v1.AdminService.CreateManga:input_type -> mangahub.v1.CreateMangaRequest
+	9,  // 8: mangahub.v1.AdminService.DeleteManga:input_type -> mangahub.v1.DeleteMangaRequest
+	0,  // 9: mangahub.v1.MangaService.GetManga:output_type -> mangahub.v1.Manga
+	5,  // 10: mangahub.v1.MangaService.SearchManga:output_type -> mangahub.v1.SearchResponse
+	7,  // 11: mangahub.v1.MangaService.UpdateProgress:output_type -> mangahub.v1.UpdateProgressResponse
+	2,  // 12: mangahub.v1.MangaService.SubscribeEvents:output_type -> mangahub.v1.EventNotification
+	0,  // 13: mangahub.v1.AdminService.CreateManga:output_type -> mangahub.v1.Manga
+	10, // 14: mangahub.v1.AdminService.DeleteManga:output_type -> mangahub.v1.DeleteMangaResponse
+	9,  // [9:15] is the sub-list for method output_type
+	3,  // [3:9] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_mangahub_proto_init() }
@@ -607,7 +759,7 @@ func file_api_proto_mangahub_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_mangahub_proto_rawDesc), len(file_api_proto_mangahub_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

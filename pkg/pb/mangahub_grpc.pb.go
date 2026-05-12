@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	MangaService_GetManga_FullMethodName        = "/mangahub.v1.MangaService/GetManga"
+	MangaService_SearchManga_FullMethodName     = "/mangahub.v1.MangaService/SearchManga"
 	MangaService_UpdateProgress_FullMethodName  = "/mangahub.v1.MangaService/UpdateProgress"
 	MangaService_SubscribeEvents_FullMethodName = "/mangahub.v1.MangaService/SubscribeEvents"
 )
@@ -31,6 +32,7 @@ const (
 type MangaServiceClient interface {
 	// User functions
 	GetManga(ctx context.Context, in *GetMangaRequest, opts ...grpc.CallOption) (*Manga, error)
+	SearchManga(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error)
 	UpdateProgress(ctx context.Context, in *UpdateProgressRequest, opts ...grpc.CallOption) (*UpdateProgressResponse, error)
 	// Real-time Event Streaming (Server-side)
 	SubscribeEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EventNotification], error)
@@ -48,6 +50,16 @@ func (c *mangaServiceClient) GetManga(ctx context.Context, in *GetMangaRequest, 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Manga)
 	err := c.cc.Invoke(ctx, MangaService_GetManga_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mangaServiceClient) SearchManga(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchResponse)
+	err := c.cc.Invoke(ctx, MangaService_SearchManga_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,6 +101,7 @@ type MangaService_SubscribeEventsClient = grpc.ServerStreamingClient[EventNotifi
 type MangaServiceServer interface {
 	// User functions
 	GetManga(context.Context, *GetMangaRequest) (*Manga, error)
+	SearchManga(context.Context, *SearchRequest) (*SearchResponse, error)
 	UpdateProgress(context.Context, *UpdateProgressRequest) (*UpdateProgressResponse, error)
 	// Real-time Event Streaming (Server-side)
 	SubscribeEvents(*emptypb.Empty, grpc.ServerStreamingServer[EventNotification]) error
@@ -104,6 +117,9 @@ type UnimplementedMangaServiceServer struct{}
 
 func (UnimplementedMangaServiceServer) GetManga(context.Context, *GetMangaRequest) (*Manga, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetManga not implemented")
+}
+func (UnimplementedMangaServiceServer) SearchManga(context.Context, *SearchRequest) (*SearchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchManga not implemented")
 }
 func (UnimplementedMangaServiceServer) UpdateProgress(context.Context, *UpdateProgressRequest) (*UpdateProgressResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProgress not implemented")
@@ -150,6 +166,24 @@ func _MangaService_GetManga_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MangaService_SearchManga_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MangaServiceServer).SearchManga(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MangaService_SearchManga_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MangaServiceServer).SearchManga(ctx, req.(*SearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MangaService_UpdateProgress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateProgressRequest)
 	if err := dec(in); err != nil {
@@ -189,6 +223,10 @@ var MangaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetManga",
 			Handler:    _MangaService_GetManga_Handler,
+		},
+		{
+			MethodName: "SearchManga",
+			Handler:    _MangaService_SearchManga_Handler,
 		},
 		{
 			MethodName: "UpdateProgress",
