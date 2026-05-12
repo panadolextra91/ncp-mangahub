@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -68,6 +69,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ChatInput = m.ChatInput[:len(m.ChatInput)-1]
 			}
 		} else if m.ActivePage == PageCreate {
+			isExempt := strings.ToLower(m.Role) == "admin"
+			if !isExempt && msg.String() != "tab" {
+				return m, nil
+			}
 			if msg.String() == "enter" {
 				return m, m.CreateMangaCmd()
 			}
@@ -152,9 +157,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case LoginSuccessMsg:
 		m.Token = msg.Token
-		m.Role = msg.Role
+		m.Role = strings.TrimSpace(msg.Role) // Ensure no hidden spaces
 		m.ActivePage = PageChat
 		m.Status = fmt.Sprintf("Logged in as %s 🌸", m.Username)
+		log.Printf("🕵️ [DEBUG] Login Successful! User: %s, Role: '%s'", m.Username, m.Role)
 		return m, tea.Batch(m.ListenWSCmd(), m.ListenEventsCmd())
 
 	case *websocket.Conn:
@@ -224,21 +230,26 @@ func (m Model) View() string {
 		evts := strings.Join(m.Events, "\n")
 		content = fmt.Sprintf("📡 SYSTEM EVENTS\n\n%s", evts)
 	case PageCreate:
-		f := func(i int, label, val string) string {
-			style := lipgloss.NewStyle().Foreground(Slate400)
-			if m.FocusIndex == i {
-				style = lipgloss.NewStyle().Foreground(PinkPastel).Bold(true)
-				return style.Render(fmt.Sprintf("> %s: %s_", label, val))
+		isAdmin := strings.ToLower(m.Role) == "admin"
+		if !isAdmin {
+			content = "\n\n  🚫 ACCESS DENIED\n\n  You are not an admin!\n  Only administrators can create new manga.\n\n  (Please switch to another tab)"
+		} else {
+			f := func(i int, label, val string) string {
+				style := lipgloss.NewStyle().Foreground(Slate400)
+				if m.FocusIndex == i {
+					style = lipgloss.NewStyle().Foreground(PinkPastel).Bold(true)
+					return style.Render(fmt.Sprintf("> %s: %s_", label, val))
+				}
+				return style.Render(fmt.Sprintf("  %s: %s", label, val))
 			}
-			return style.Render(fmt.Sprintf("  %s: %s", label, val))
+			content = fmt.Sprintf("🏗️ CREATE NEW MANGA\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n(Press Enter to Broadcast)", 
+				f(0, "Title   ", m.MangaTitle),
+				f(1, "Author  ", m.MangaAuthor),
+				f(2, "Genres  ", m.MangaGenres),
+				f(3, "Status  ", m.MangaStatus),
+				f(4, "Chapters", m.MangaChapters),
+				f(5, "Desc    ", m.MangaDesc))
 		}
-		content = fmt.Sprintf("🏗️ CREATE NEW MANGA\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n(Press Enter to Broadcast)", 
-			f(0, "Title   ", m.MangaTitle),
-			f(1, "Author  ", m.MangaAuthor),
-			f(2, "Genres  ", m.MangaGenres),
-			f(3, "Status  ", m.MangaStatus),
-			f(4, "Chapters", m.MangaChapters),
-			f(5, "Desc    ", m.MangaDesc))
 	case PageProgress:
 		f := func(i int, label, val string) string {
 			style := lipgloss.NewStyle().Foreground(Slate400)

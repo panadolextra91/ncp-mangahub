@@ -69,8 +69,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("🔑 [AUTH] User Logged In: %s (ID: %d)", req.Username, user.ID)
-	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
+	log.Printf("🔑 [AUTH] User Logged In: %s (Role: %s)", user.Username, user.Role)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"token": tokenString,
+		"user":  user,
+	})
 }
 
 type MangaHandler struct {
