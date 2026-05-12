@@ -115,3 +115,13 @@ sequenceDiagram
 - **Raw TCP**: Đồng bộ tiến độ đọc đa thiết bị (Stateful Sync).
 - **Raw UDP**: Thông báo sự kiện nhanh (Fire-and-forget Broadcast).
 - **Bubbletea & Lipgloss**: Xây dựng giao diện TUI hiện đại.
+
+---
+
+### 🔍 Search & Filter Contract (Cross-Protocol)
+
+Cả HTTP (`GET /api/manga`) và gRPC (`MangaService/SearchManga`) chia sẻ cùng một bộ filter:
+- `q` (fuzzy title/author), `genres` (OR, cap 10), `status` (exact), `sortBy` (`title` | `recent`).
+- HTTP handler và gRPC service đều route qua `application.MangaService.SearchMangasWithFilters` khi có filter mới — đảm bảo behavior nhất quán giữa hai protocol.
+- Wire-level back-compat: client cũ chỉ gửi `query` (gRPC) hoặc `?q=` (HTTP) vẫn đi qua đường `SearchMangas` cũ.
+- Chi tiết: xem `API_CONTRACT.md §2.2`.
