@@ -282,6 +282,9 @@ func (x *GetMangaRequest) GetId() int32 {
 type SearchRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	Genres        []string               `protobuf:"bytes,2,rep,name=genres,proto3" json:"genres,omitempty"`
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	SortBy        string                 `protobuf:"bytes,4,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -319,6 +322,27 @@ func (*SearchRequest) Descriptor() ([]byte, []int) {
 func (x *SearchRequest) GetQuery() string {
 	if x != nil {
 		return x.Query
+	}
+	return ""
+}
+
+func (x *SearchRequest) GetGenres() []string {
+	if x != nil {
+		return x.Genres
+	}
+	return nil
+}
+
+func (x *SearchRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *SearchRequest) GetSortBy() string {
+	if x != nil {
+		return x.SortBy
 	}
 	return ""
 }
@@ -666,9 +690,12 @@ const file_api_proto_mangahub_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x128\n" +
 	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"!\n" +
 	"\x0fGetMangaRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"%\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"n\n" +
 	"\rSearchRequest\x12\x14\n" +
-	"\x05query\x18\x01 \x01(\tR\x05query\"<\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\x12\x16\n" +
+	"\x06genres\x18\x02 \x03(\tR\x06genres\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x17\n" +
+	"\asort_by\x18\x04 \x01(\tR\x06sortBy\"<\n" +
 	"\x0eSearchResponse\x12*\n" +
 	"\x06mangas\x18\x01 \x03(\v2\x12.mangahub.v1.MangaR\x06mangas\"L\n" +
 	"\x15UpdateProgressRequest\x12\x19\n" +

@@ -39,6 +39,9 @@ message GetMangaRequest {
 
 message SearchRequest {
     string query = 1;
+    repeated string genres = 2;
+    string status = 3;
+    string sort_by = 4;
 }
 
 message SearchResponse {
