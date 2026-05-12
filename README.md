@@ -18,6 +18,7 @@ Dự án này không chỉ là một bài tập kỹ thuật, mà là một tr�
 - **🛡️ RBAC (Role-Based Access Control)**: Phân quyền Admin/User nghiêm ngặt. Chỉ Admin mới thấy và sử dụng được tính năng gRPC/Create Manga.
 - **📚 Personal Library**: Thư viện cá nhân cho phép lưu truyện, xem chi tiết và theo dõi tiến độ đọc theo 3 trạng thái.
 - **🕸️ Web Scraping**: Tích hợp bóc tách dữ liệu từ `quotes.toscrape.com` để hiển thị danh ngôn truyền cảm hứng mỗi ngày trên Dashboard.
+- **🔍 Advanced Search & Filtering**: Tìm kiếm nâng cao trên `GET /api/manga` (và gRPC `SearchManga`): lọc theo nhiều genres (OR), trạng thái (`ongoing`/`completed`), và sắp xếp theo `title` hoặc `recent`. Tối đa 10 genres mỗi request.
 - **🔋 Graceful Shutdown**: Quy trình tắt máy 5 bước đảm bảo an toàn dữ liệu và giải phóng tài nguyên mạng.
 
 ---

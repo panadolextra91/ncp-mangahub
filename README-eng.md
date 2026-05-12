@@ -16,7 +16,10 @@ Experience the ultimate **"TUI-First"** environment with our stylish Pink Pastel
     - **TCP (Raw)**: Instant cross-device reading progress synchronization.
     - **UDP**: Fast, lightweight "Fire-and-forget" release notifications.
 - **🛡️ RBAC (Role-Based Access Control)**: Strict identity management. Administrative functions are dynamically gated based on user roles.
-- **📚 100+ Manga Titles**: Pre-seeded with over 100 popular manga series with rich metadata.
+- **📚 Personal Library**: Save titles to your personal shelf, view details, and track reading progress across three statuses (`reading`, `completed`, `plan_to_read`).
+- **🕸️ Web Scraping**: Integrated quote-of-the-day scraper that pulls inspirational quotes from `quotes.toscrape.com` for the TUI dashboard.
+- **🔍 Advanced Search & Filtering**: Multi-criteria search on `GET /api/manga` and gRPC `SearchManga`: filter by multiple genres (OR), status, and sort by `title` or `recent`. Capped at 10 genres per request.
+- **🌱 Pre-seeded Catalog**: Over 100 popular manga series with rich metadata, ready for instant demo.
 - **🔋 Graceful Shutdown**: A 5-step termination protocol ensuring data integrity and clean resource cleanup.
 
 ---
@@ -39,6 +42,12 @@ For a quick demo, we provide pre-built binaries:
 go run cmd/server/main.go  # Start Server
 go run cmd/client/main.go  # Start TUI
 ```
+
+3. **Run with Docker (Recommended for Demo)**:
+    ```bash
+    docker-compose up --build
+    ```
+    *Note: Run the TUI Client directly on the host for the best terminal rendering experience.*
 
 ---
 
