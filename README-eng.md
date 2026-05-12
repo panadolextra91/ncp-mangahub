@@ -1,134 +1,58 @@
-# MangaHub: Multi-Protocol Manga Ecosystem
+# 🌸 MangaHub - The Pink Professional Monolith
 
-[![English](https://img.shields.io/badge/Language-English-blue)](README-eng.md) 
-[![Vietnamese](https://img.shields.io/badge/Ngôn_ngữ-Tiếng_Việt-red)](README.md)
+MangaHub is a comprehensive manga tracking and management system built on **Clean Architecture** principles. It serves as a practical demonstration of integrating **5 essential network protocols** into a single cohesive system: **HTTP, gRPC, WebSocket, TCP, and UDP**.
 
-**MangaHub** is a modern manga management system built as a **Modular Monolith** with a **Hexagonal (Clean Architecture)** approach. This project demonstrates the seamless integration of 5 different network protocols (**HTTP, WebSocket, TCP, UDP, gRPC**) on a single Go platform, delivered as a lightweight "Single Binary".
-
----
-
-## 🎨 "Pink & Professional" User Experience
-
-The system is designed with a **Pink Pastel (#FBCFE8)** theme on a **Subtle Black (#0B0E11)** background, providing a premium and modern feel:
-
-- **Web Dashboard**: A Shadcn/UI-style interface with 5 pink glow LED indicators for each protocol, pulsating whenever an event is received.
-- **TUI (Terminal UI)**: A powerful interactive CLI app featuring dynamic ASCII art (Kero-chan, Berserk, Evangelion) that alternates every 60 seconds.
+Experience the ultimate **"TUI-First"** environment with our stylish Pink Pastel Terminal Interface.
 
 ---
 
-## 🏗️ System Architecture
+## 🚀 Key Features
 
-MangaHub strictly follows the **Modular Monolith** model combined with **Ports & Adapters**, ensuring business logic is decoupled from infrastructure.
-
-### High-Level Diagram
-```mermaid
-graph TD
-    Client[Multi-Protocol Clients] --> HTTP[HTTP API - 8080]
-    Client --> WS[WebSocket - 8080]
-    Client --> TCP[TCP Sync - 9090]
-    Client --> UDP[UDP Notify - 9191]
-    Client --> GRPC[gRPC Admin - 50051]
-
-    subgraph Adapters [Interface Adapters]
-        HTTP
-        WS
-        TCP
-        UDP
-        GRPC
-    end
-
-    Adapters --> Bus[Internal EventBus - Go Channels]
-    
-    subgraph Application [Application Layer]
-        MangaSvc[Manga Service]
-        AuthSvc[Auth Service]
-        ChatSvc[Chat Service]
-    end
-    
-    Bus <--> Application
-    Application --> Domain[Domain Models]
-    Application --> DB[(SQLite WAL Mode)]
-```
+- **🌸 PinkHub TUI**: A high-performance terminal UI featuring ASCII animations, smooth scrolling lists, and role-aware components.
+- **🔐 Multi-Protocol Core**:
+    - **HTTP**: Handles JWT Authentication and standard CRUD operations.
+    - **gRPC**: High-efficiency internal search and administrative services.
+    - **WebSocket**: Real-time community chat hub.
+    - **TCP (Raw)**: Instant cross-device reading progress synchronization.
+    - **UDP**: Fast, lightweight "Fire-and-forget" release notifications.
+- **🛡️ RBAC (Role-Based Access Control)**: Strict identity management. Administrative functions are dynamically gated based on user roles.
+- **📚 100+ Manga Titles**: Pre-seeded with over 100 popular manga series with rich metadata.
+- **🔋 Graceful Shutdown**: A 5-step termination protocol ensuring data integrity and clean resource cleanup.
 
 ---
 
-## 🚦 Protocol Matrix
+## 🛠️ Quick Start
 
-| Protocol | Port | Role | Technology |
-| :--- | :--- | :--- | :--- |
-| **HTTP 1.1** | 8080 | Core API (REST Management) | Native Go `ServeMux` + JWT |
-| **WebSocket** | 8080 | Real-time Community Chat | `gorilla/websocket` |
-| **TCP** | 9090 | High-performance Binary Sync | Custom Hub + Non-blocking sender |
-| **UDP** | 9191 | Lightweight Push Notifications | Fire-and-forget + TTL Registry |
-| **gRPC** | 50052 | Admin API & Event Streaming | Protobuf + Server-side Stream |
+For a quick demo, we provide pre-built binaries:
 
----
+1.  **Launch the Core Server**:
+    ```bash
+    ./server
+    ```
+2.  **Launch the TUI Client**:
+    ```bash
+    ./tui
+    ```
 
-## 🛠️ Development Trace & Technical Decisions
-
-### Phases 1-3: Foundations & Modules
-- **Decision**: Use **SQLite in WAL (Write-Ahead Logging) Mode**.
-- **Trade-off**: High write-throughput limitation was accepted in exchange for zero-dependency portability (Single Binary) and extreme read performance for real-time protocol monitoring.
-
-### Phases 5-7: Real-time Multi-Protocol Layer
-- **Decision (TCP)**: Isolated Hub design. Slow consumers are dropped/skipped to prevent EventBus stalls.
-- **Decision (UDP)**: Registration mechanism (SUB Packet) with a 60-second TTL (Time-To-Live).
-- **Trade-off**: Sacrificed UDP reliability (no ACKs) for raw speed and minimal system overhead for "ticker-style" notifications.
-
-### Phase 9: Graceful Shutdown (Safe Landing)
-- **Decision**: A strict 5-step shutdown procedure (HTTP -> UDP/TCP -> gRPC -> Bus -> DB).
-- **Reasoning**: Ensures zero data loss for active chats or reading progress during server maintenance.
-
----
-
-## 📡 Event Propagation Flow
-
-Every action in the system is synchronized across all protocols via a centralized **EventBus**.
-
-```mermaid
-sequenceDiagram
-    participant User as Client (HTTP/gRPC)
-    participant Bus as EventBus (Go Channels)
-    participant TCP as TCP Hub
-    participant WS as WebSocket Hub
-    participant UDP as UDP Registry
-
-    User->>Bus: Publish("manga.new")
-    par Broadcast
-        Bus->>TCP: Sync Object
-        Bus->>WS: JSON Message
-        Bus->>UDP: Fire Unicast
-    end
-    Note over TCP,UDP: Every protocol receives the update simultaneously!
-```
-
----
-
-## 🚀 Quick Start
-
-Requires Go v1.22+.
-
-### 1. Launch the Server (Terminal 1)
+*To run from source:*
 ```bash
-go run cmd/server/main.go
-# The server will start and listen on all 5 ports simultaneously!
+go run cmd/server/main.go  # Start Server
+go run cmd/client/main.go  # Start TUI
 ```
 
-### 2. Launch the Pink TUI (Terminal 2)
-```bash
-go run cmd/client/main.go
-# Experience the premium "Pink & Professional" terminal interface.
-```
+---
 
-### 3. Access Web Dashboard
-Open your terminal: [http://localhost:8080](http://localhost:8080)
-- **User**: `admin`
-- **Pass**: `password`
+## 📖 Technical Documentation
+
+Dive deeper into our system design:
+- [🏗️ System Architecture](./ARCHITECTURE.md)
+- [📜 API Contract & Protocol Flows](./API_CONTRACT.md)
 
 ---
 
 ## 🧪 Testing
-The system includes a rigorous E2E test suite at `tests/e2e/`. These tests verify high-concurrency stress, fault isolation for slow clients, and cross-protocol data consistency.
+
+MangaHub includes a rigorous E2E test suite in `tests/e2e/`, verifying system stability and cross-protocol data consistency.
 
 ```bash
 go test -v ./tests/e2e/...
@@ -136,4 +60,4 @@ go test -v ./tests/e2e/...
 
 ---
 
-Crafted with care by **Mẹ Architect & Antigravity**. Enjoy the "Pink Professional" experience! 🌸🤖
+Crafted with passion by **Mẹ Architect & Antigravity**. Enjoy the "Pink Professional" experience! 🌸🤖
