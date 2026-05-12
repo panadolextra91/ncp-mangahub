@@ -12,19 +12,21 @@ Ensure 100% stable demonstration of all 5 protocols working together seamlessly.
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Implementation of Modular Monolith structure in Go (Phase 1)
+- [x] Internal Event Bus using buffered, non-blocking channels (Phase 2)
+- [x] HTTP Protocol for Core REST API (Phase 4)
+- [x] TCP Protocol for persistent real-time sync (Phase 5, 14)
+- [x] WebSocket Protocol for real-time chat (Phase 6)
+- [x] UDP Protocol for lightweight notification broadcasting (Phase 7)
+- [x] gRPC Protocol for Search & Admin (Phase 8, 12)
+- [x] SQLite setup with WAL and single write connection (Phase 1)
+- [x] Graceful shutdown implementing strict cleanup (Phase 9)
+- [x] Web Scraping from quotes.toscrape.com (Phase 13)
+- [x] Personal Library with 3 reading statuses (Phase 14)
 
 ### Active
 
-- [ ] Implementation of Modular Monolith structure in Go
-- [ ] Internal Event Bus using buffered, non-blocking channels
-- [ ] HTTP Protocol for Core REST API (Auth, Manga CRUD, Progress update), serving as the sole DB writer
-- [ ] TCP Protocol for persistent real-time sync (broadcast JSON)
-- [ ] WebSocket Protocol for real-time chat (rooms by manga_id)
-- [ ] UDP Protocol for lightweight notification broadcasting
-- [ ] gRPC Protocol for CLI tool and internal admin operations
-- [ ] SQLite database setup with WAL mode and single write connection lock control
-- [ ] Graceful shutdown implementing strict goroutine lifecycle and resource cleanup
+(All core objectives for Milestone 1 achieved)
 
 ### Out of Scope
 
@@ -47,11 +49,11 @@ Ensure 100% stable demonstration of all 5 protocols working together seamlessly.
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Allow event drop for slow consumers | Prevents blocking the entire event bus and system | — Pending |
-| Only HTTP writes to DB | Centralizes mutation state, avoids SQLite locking nightmares from multiple protocol queues | — Pending |
-| gRPC for Admin/CLI only | Better performance and strong typing, avoiding internal spaghetti call mesh | — Pending |
+| Allow event drop for slow consumers | Prevents blocking the entire event bus and system | ✅ IMPLEMENTED |
+| Only HTTP writes to DB | Centralizes mutation state, avoids SQLite locking nightmares | ✅ IMPLEMENTED |
+| gRPC for Admin/Search | Better performance and strong typing | ✅ IMPLEMENTED |
+| TUI as unified dashboard | Visualize 5 protocols in one place for demo | ✅ IMPLEMENTED |
+| In-memory Scraping | Compliance with volatile data requirements | ✅ IMPLEMENTED |
 
 ## Evolution
 
@@ -71,4 +73,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-13 after initialization*
+*Last updated: 2026-05-12 after Phase 14 completion*

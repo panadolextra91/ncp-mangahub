@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbletea"
 	"github.com/gorilla/websocket"
+	"github.com/user/mangahub/pkg/models"
 )
 
 type Page int
@@ -16,6 +17,9 @@ const (
 	PageCreate
 	PageProgress
 	PageSearch
+	PageDiscover
+	PageLibrary
+	PageDetail
 )
 
 type Model struct {
@@ -47,6 +51,11 @@ type Model struct {
 	SearchIndex int // Scrolling index for search results
 	WS          *websocket.Conn
 	Stream      EventStream
+	Quotes      []models.Quote
+	CurrentQuoteIndex int
+	LibraryResults    []*models.UserProgress
+	SelectedManga     *models.Manga
+	LibraryIndex      int
 }
 
 type TickMsg time.Time
@@ -57,6 +66,7 @@ type LoginSuccessMsg struct {
 	Role  string
 }
 type ErrorMsg string
+type TCPSyncMsg string
 
 func NewModel() Model {
 	return Model{
@@ -69,6 +79,7 @@ func NewModel() Model {
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		TickCommand(),
+		m.ScrapeQuotesCmd(),
 	)
 }
 

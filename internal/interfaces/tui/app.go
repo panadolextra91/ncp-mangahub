@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,6 +21,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"github.com/user/mangahub/internal/application"
+	"github.com/user/mangahub/pkg/models"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -130,6 +133,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.SearchIndex = 0 // Reset scroll on new search
 				return m, m.SearchMangaCmd()
 			}
+			if msg.String() == "right" || msg.String() == "enter" && len(m.SearchResults) > 0 {
+				// Go to Detail view for selected manga
+				selectedLine := m.SearchResults[m.SearchIndex]
+				// Parse ID from line (starts with ID)
+				idStr := strings.Fields(selectedLine)[0]
+				id, _ := strconv.Atoi(idStr)
+				m.ActivePage = PageDetail
+				m.Status = fmt.Sprintf("Loading Manga #%d...", id)
+				return m, m.GetMangaDetailCmd(id)
+			}
 			if msg.String() == "up" && m.SearchIndex > 0 {
 				m.SearchIndex--
 			} else if msg.String() == "down" && m.SearchIndex < len(m.SearchResults)-1 {
@@ -143,14 +156,60 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if msg.String() == "backspace" && len(m.SearchInput) > 0 {
 				m.SearchInput = m.SearchInput[:len(m.SearchInput)-1]
 			}
+		} else if m.ActivePage == PageDiscover {
+			if msg.String() == "up" && m.CurrentQuoteIndex > 0 {
+				m.CurrentQuoteIndex--
+			} else if msg.String() == "down" && m.CurrentQuoteIndex < len(m.Quotes)-1 {
+				m.CurrentQuoteIndex++
+			}
+		} else if m.ActivePage == PageDetail {
+			if msg.String() == "a" && m.SelectedManga != nil {
+				m.Status = "➕ Adding to Library..."
+				return m, m.AddLibraryCmd(m.SelectedManga.ID)
+			}
+			if msg.String() == "esc" || msg.String() == "backspace" {
+				m.ActivePage = PageSearch
+				return m, nil
+			}
+		} else if m.ActivePage == PageLibrary {
+			if msg.String() == "up" && m.LibraryIndex > 0 {
+				m.LibraryIndex--
+			} else if msg.String() == "down" && m.LibraryIndex < len(m.LibraryResults)-1 {
+				m.LibraryIndex++
+			}
+			if msg.String() == "r" {
+				return m, m.FetchLibraryCmd()
+			}
+		}
+
+		// Global keys
+		switch msg.String() {
+		case "r":
+			if m.ActivePage == PageDiscover {
+				m.Status = "🔄 Refreshing Quotes..."
+				return m, m.ScrapeQuotesCmd()
+			}
+			if m.ActivePage == PageLibrary {
+				m.Status = "🔄 Refreshing Library..."
+				return m, m.FetchLibraryCmd()
+			}
 		}
 
 		// Tab switching
 		switch msg.String() {
 		case "tab":
 			if m.ActivePage != PageLogin {
-				m.ActivePage = (m.ActivePage % 5) + 1
+				// Cycle through 7 main tabs (1 to 7)
+				// PageDetail (8) is excluded from tab cycling
+				if m.ActivePage >= PageLibrary {
+					m.ActivePage = PageChat
+				} else {
+					m.ActivePage++
+				}
 				m.FocusIndex = 0
+				if m.ActivePage == PageLibrary {
+					return m, m.FetchLibraryCmd()
+				}
 			}
 		}
 
@@ -168,7 +227,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ActivePage = PageChat
 		m.Status = fmt.Sprintf("Logged in as %s 🌸", m.Username)
 		log.Printf("🕵️ [DEBUG] Login Successful! User: %s, Role: '%s'", m.Username, m.Role)
-		return m, tea.Batch(m.ListenWSCmd(), m.ListenEventsCmd())
+		return m, tea.Batch(m.ListenWSCmd(), m.ListenEventsCmd(), m.ListenTCPCmd())
+
+	case TCPSyncMsg:
+		m.Status = "🔄 Sync: " + string(msg)
+		if m.ActivePage == PageLibrary {
+			return m, m.FetchLibraryCmd()
+		}
+		return m, nil
 
 	case *websocket.Conn:
 		m.WS = msg
@@ -193,6 +259,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case SearchSuccessMsg:
 		m.SearchResults = msg
 		m.Status = fmt.Sprintf("Found %d results 📚", len(msg))
+		return m, nil
+
+	case []models.Quote:
+		m.Quotes = msg
+		m.Status = "Quotes Updated! ✨"
+		return m, nil
+
+	case *models.Manga:
+		m.SelectedManga = msg
+		m.Status = "Viewing: " + msg.Title
+		return m, nil
+
+	case []*models.UserProgress:
+		m.LibraryResults = msg
+		m.Status = fmt.Sprintf("Library Updated (%d items) 📚", len(m.LibraryResults))
 		return m, nil
 
 	case ErrorMsg:
@@ -299,10 +380,51 @@ func (m Model) View() string {
 
 		content = fmt.Sprintf("🔍 SEARCH MANGA\n\nQuery: %s_\n\n(Press Enter to Search)\n\nRESULTS:\n  ID\tTITLE\t\t\t\t\tCHAPS\tSTATUS\n%s%s", 
 			m.SearchInput, results, scrollInfo)
+	case PageDiscover:
+		var lines []string
+		for i, q := range m.Quotes {
+			prefix := "  "
+			if i == m.CurrentQuoteIndex {
+				prefix = "> "
+			}
+			text := q.Text
+			if len(text) > 60 { text = text[:57] + "..." }
+			lines = append(lines, fmt.Sprintf("%s\"%s\" - %s", prefix, text, q.Author))
+		}
+		content = fmt.Sprintf("🌟 DISCOVER QUOTES (Scraped from httpbin/quotes)\n\n%s\n\n(Press 'r' to re-scrape | Up/Down to scroll)", strings.Join(lines, "\n"))
+	case PageDetail:
+		if m.SelectedManga == nil {
+			content = "Loading details..."
+		} else {
+			m := m.SelectedManga
+			content = fmt.Sprintf("📖 MANGA DETAILS\n\n"+
+				"Title:    %s\n"+
+				"Author:   %s\n"+
+				"Status:   %s\n"+
+				"Chapters: %d\n"+
+				"Genres:   %s\n\n"+
+				"Description:\n%s\n\n"+
+				"(Press 'a' to Add to Library | Backspace to return)", 
+				m.Title, m.Author, m.Status, m.TotalChapters, m.Genres, m.Description)
+		}
+	case PageLibrary:
+		var lines []string
+		for i, p := range m.LibraryResults {
+			prefix := "  "
+			if i == m.LibraryIndex {
+				prefix = "> "
+			}
+			line := fmt.Sprintf("%sManga #%-4d | Chap %-4d | %s", prefix, p.MangaID, p.CurrentChapter, p.Status)
+			lines = append(lines, line)
+		}
+		if len(lines) == 0 {
+			lines = append(lines, "  Your library is empty. Go search and add some manga! 🌸")
+		}
+		content = fmt.Sprintf("📚 MY PERSONAL LIBRARY\n\n%s\n\n(Press 'r' to Refresh | Up/Down to Scroll)", strings.Join(lines, "\n"))
 	}
 
 	// Tabs
-	tabs := []string{"CHAT [1]", "EVENTS [2]", "CREATE [3]", "PROGRESS [4]", "SEARCH [5]"}
+	tabs := []string{"CHAT [1]", "EVENTS [2]", "CREATE [3]", "PROGRESS [4]", "SEARCH [5]", "DISCOVER [6]", "LIBRARY [7]"}
 	var renderedTabs []string
 	for i, t := range tabs {
 		if int(m.ActivePage) == i+1 {
@@ -313,10 +435,22 @@ func (m Model) View() string {
 	}
 	tabRow := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
 
+	// Dashboard Enhancement: Add a quote below ASCII if available
+	quoteView := ""
+	if len(m.Quotes) > 0 {
+		q := m.Quotes[time.Now().UnixNano()%int64(len(m.Quotes))]
+		quoteView = lipgloss.NewStyle().
+			Foreground(PinkPastel).
+			Italic(true).
+			Width(25).
+			Align(lipgloss.Center).
+			Render(fmt.Sprintf("\n\"%s\"\n— %s", q.Text, q.Author))
+	}
+
 	mainView := lipgloss.JoinVertical(lipgloss.Left, tabRow, BorderStyle.Width(m.Width-30).Height(m.Height-12).Render(content))
 	
 	fullView := lipgloss.JoinHorizontal(lipgloss.Center, 
-		lipgloss.NewStyle().Width(25).Render(ascii),
+		lipgloss.JoinVertical(lipgloss.Center, ascii, quoteView),
 		mainView,
 	)
 
@@ -524,5 +658,105 @@ func (m Model) SearchMangaCmd() tea.Cmd {
 			lines = append(lines, line)
 		}
 		return SearchSuccessMsg(lines)
+	}
+}
+
+func (m Model) ScrapeQuotesCmd() tea.Cmd {
+	return func() tea.Msg {
+		scraper := application.NewScraperService()
+		quotes, err := scraper.FetchQuotes()
+		if err != nil {
+			return ErrorMsg("Scrape Failed: " + err.Error())
+		}
+		return quotes
+	}
+}
+
+func (m Model) GetMangaDetailCmd(id int) tea.Cmd {
+	return func() tea.Msg {
+		url := fmt.Sprintf("http://127.0.0.1:8080/api/manga/%d", id)
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("Authorization", "Bearer "+m.Token)
+		
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			return ErrorMsg("Failed to fetch detail")
+		}
+		defer resp.Body.Close()
+
+		var manga models.Manga
+		json.NewDecoder(resp.Body).Decode(&manga)
+		return &manga
+	}
+}
+
+func (m Model) AddLibraryCmd(mangaID int) tea.Cmd {
+	return func() tea.Msg {
+		url := "http://127.0.0.1:8080/api/manga/progress"
+		payload := map[string]interface{}{
+			"manga_id":        mangaID,
+			"current_chapter": 0,
+			"status":          "plan_to_read",
+		}
+		jsonData, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+		req.Header.Set("Authorization", "Bearer "+m.Token)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil || resp.StatusCode != http.StatusOK {
+			return ErrorMsg("Failed to add to library")
+		}
+		return EventMsg("Added to Library! ✨")
+	}
+}
+
+func (m Model) FetchLibraryCmd() tea.Cmd {
+	return func() tea.Msg {
+		url := "http://127.0.0.1:8080/api/manga/library"
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("Authorization", "Bearer "+m.Token)
+
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			return ErrorMsg("Failed to fetch library")
+		}
+		defer resp.Body.Close()
+
+		var results []*models.UserProgress
+		json.NewDecoder(resp.Body).Decode(&results)
+		return results
+	}
+}
+
+func (m Model) ListenTCPCmd() tea.Cmd {
+	return func() tea.Msg {
+		conn, err := net.Dial("tcp", "127.0.0.1:9090")
+		if err != nil {
+			return ErrorMsg("TCP Sync Failed")
+		}
+		// In a real app we'd send an AUTH message here, but for demo we just listen
+		return m.ReceiveTCPCmd(conn)()
+	}
+}
+
+func (m Model) ReceiveTCPCmd(conn net.Conn) tea.Cmd {
+	return func() tea.Msg {
+		buf := make(chan tea.Msg)
+		go func() {
+			for {
+				data := make([]byte, 1024)
+				n, err := conn.Read(data)
+				if err != nil {
+					buf <- ErrorMsg("TCP Read Error")
+					return
+				}
+				buf <- TCPSyncMsg(string(data[:n]))
+			}
+		}()
+		return <-buf
 	}
 }

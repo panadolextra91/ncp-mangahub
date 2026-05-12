@@ -90,6 +90,17 @@ sequenceDiagram
     ORDER BY id DESC;
     ```
 
+### 2.3 Get Manga Detail
+- **Endpoint**: `GET /api/manga/{id}`
+- **📍 Source**: `internal/interfaces/http/handlers.go` -> `MangaHandler.Get`
+- **🛡️ JWT Required**: **Yes**
+- **Flow**: Trả về toàn bộ thông tin chi tiết của một bộ truyện (Mô tả, Tác giả, v.v.) để hiển thị trên màn hình **DETAIL** của TUI.
+
+- **SQL Query**:
+    ```sql
+    SELECT * FROM mangas WHERE id = ?;
+    ```
+
 ---
 
 ## 💬 3. Real-time Interactions (WebSocket)
@@ -166,14 +177,19 @@ sequenceDiagram
     API-->>TUI: 200 OK
 ```
 
-- **SQL Query**:
-    ```sql
-    INSERT INTO user_progress (user_id, manga_id, current_chapter, status) 
-    VALUES (?, ?, ?, ?)
-    ON CONFLICT(user_id, manga_id) DO UPDATE SET 
-    current_chapter = excluded.current_chapter, 
     status = excluded.status, 
     updated_at = CURRENT_TIMESTAMP;
+    ```
+
+### 5.2 Get Personal Library
+- **Endpoint**: `GET /api/manga/library`
+- **📍 Source**: `internal/interfaces/http/handlers.go` -> `ProgressHandler.List`
+- **🛡️ JWT Required**: **Yes**
+- **Flow**: Lấy toàn bộ danh sách truyện mà User đã lưu (Library) cùng với tiến độ đọc tương ứng.
+
+- **SQL Query**:
+    ```sql
+    SELECT * FROM user_progress WHERE user_id = ? ORDER BY updated_at DESC;
     ```
 
 ---
@@ -184,8 +200,11 @@ sequenceDiagram
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Login** | HTTP | **No** | None | SELECT/INSERT user | `http/handlers.go` |
 | **Search** | HTTP / gRPC | **Yes** | Any | SELECT LIKE | `http/handlers.go` |
+| **Get Detail**| HTTP | **Yes** | Any | SELECT WHERE ID | `http/handlers.go` |
 | **Create** | HTTP / gRPC | **Yes** | **Admin** | INSERT manga | `grpc/services.go` |
 | **Chat** | WebSocket | **Yes** | Any | INSERT chat_msg | `ws/handlers.go` |
 | **Notify** | UDP | **No** | None | N/A (Broadcast) | `udp/server.go` |
 | **Sync** | TCP | **Yes** | Any | N/A (Push) | `tcp/server.go` |
-| **Progress** | HTTP | **Yes** | Any | UPSERT progress | `http/handlers.go` |
+| **Update Progress**| HTTP | **Yes** | Any | UPSERT progress | `http/handlers.go` |
+| **List Library**| HTTP | **Yes** | Any | SELECT Library | `http/handlers.go` |
+| **Web Scraping**| HTTP (External)| **No** | None | N/A (External) | `application/scraper_service.go` |

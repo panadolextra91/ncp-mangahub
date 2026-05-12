@@ -68,7 +68,7 @@ func (h *ChatHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 	h.hub.Register <- client
 	log.Printf("🌐 [WS] New Connection: UserID %d (MangaID: %d)", claims.UserID, mangaID)
 
-	// 3. Send History (Mẹ Architect: Bắt buộc lôi 20 tin gần nhất quăng vào mặt nó)
+	// 3. Send History (Bắt buộc lôi 20 tin gần nhất quăng vào mặt nó)
 	history, err := h.chatService.GetHistory(mangaID)
 	if err == nil {
 		for _, msg := range history {

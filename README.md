@@ -16,7 +16,8 @@ Dự án này không chỉ là một bài tập kỹ thuật, mà là một tr�
     - **TCP (Raw)**: Đồng bộ hóa tiến độ đọc truyện đa thiết bị tức thời.
     - **UDP**: Hệ thống thông báo (Notification) truyện mới cực nhanh.
 - **🛡️ RBAC (Role-Based Access Control)**: Phân quyền Admin/User nghiêm ngặt. Chỉ Admin mới thấy và sử dụng được tính năng gRPC/Create Manga.
-- **📚 100+ Manga Library**: Kho dữ liệu được Seed sẵn hơn 100 bộ truyện nổi tiếng nhất thế giới.
+- **📚 Personal Library**: Thư viện cá nhân cho phép lưu truyện, xem chi tiết và theo dõi tiến độ đọc theo 3 trạng thái.
+- **🕸️ Web Scraping**: Tích hợp bóc tách dữ liệu từ `quotes.toscrape.com` để hiển thị danh ngôn truyền cảm hứng mỗi ngày trên Dashboard.
 - **🔋 Graceful Shutdown**: Quy trình tắt máy 5 bước đảm bảo an toàn dữ liệu và giải phóng tài nguyên mạng.
 
 ---
@@ -39,6 +40,12 @@ Dành cho buổi Demo nhanh, chúng tôi đã chuẩn bị sẵn các file nhị
 go run cmd/server/main.go  # Start Server
 go run cmd/client/main.go  # Start TUI
 ```
+
+3. **Khởi động bằng Docker (Recommended for Demo)**:
+    ```bash
+    docker-compose up --build
+    ```
+    *Lưu ý: TUI Client nên chạy trực tiếp trên máy host để đảm bảo trải nghiệm hiển thị tốt nhất.*
 
 ---
 
