@@ -82,3 +82,146 @@ func TestMangaListSearch(t *testing.T) {
 		assert.Equal(t, 0, len(result))
 	})
 }
+
+// TestMangaListFilters covers the WH7 advanced filter contract:
+//   - genres (single + multi OR), status, sortBy
+//   - cap of 10 genres
+//   - bit-for-bit backwards compat for q-only callers (routes to SearchMangas, NOT SearchMangasWithFilters)
+func TestMangaListFilters(t *testing.T) {
+	t.Run("Filter by single genre", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		expected := application.SearchFilters{Genres: []string{"Action"}}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{{Title: "Naruto"}}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?genres=Action", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	t.Run("Filter by multiple genres (OR)", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		expected := application.SearchFilters{Genres: []string{"Action", "Romance"}}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{{Title: "Naruto"}, {Title: "Fruits Basket"}}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?genres=Action,Romance", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	t.Run("Filter by status", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		expected := application.SearchFilters{Status: "ongoing"}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{{Title: "Naruto"}}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?status=ongoing", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	t.Run("Sort by title", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		expected := application.SearchFilters{SortBy: "title"}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?sortBy=title", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	t.Run("Combined filters (AND across types)", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		expected := application.SearchFilters{
+			Query:  "demon",
+			Genres: []string{"Action"},
+			Status: "ongoing",
+			SortBy: "title",
+		}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{{Title: "Demon Slayer"}}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?q=demon&genres=Action&status=ongoing&sortBy=title", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	t.Run("Genre cap at 10", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		// 12 genres in; expect 10 out (cap).
+		expected := application.SearchFilters{Genres: []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"}}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?genres=A,B,C,D,E,F,G,H,I,J,K,L", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	t.Run("Genres with whitespace and empties stripped", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		expected := application.SearchFilters{Genres: []string{"Action", "Romance"}}
+		svc.On("SearchMangasWithFilters", expected).Return([]*models.Manga{}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?genres=Action%2C%20%2C%20Romance%20", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+	})
+
+	// Backcompat: when ONLY ?q= is present, MangaHandler.List must route through
+	// SearchMangas (legacy SQL), NOT SearchMangasWithFilters. This is the
+	// critical wire-level backcompat assertion.
+	t.Run("Backcompat: q-only routes to SearchMangas (not SearchMangasWithFilters)", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		svc.On("SearchMangas", "naruto").Return([]*models.Manga{{Title: "Naruto"}}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?q=naruto", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+		// Guarantee filtered path was NOT used for q-only call.
+		svc.AssertNotCalled(t, "SearchMangasWithFilters", mock.Anything)
+	})
+
+	// sortBy=recent is an explicit no-op — must NOT trigger the filtered path.
+	t.Run("Backcompat: q + sortBy=recent stays on legacy path", func(t *testing.T) {
+		svc := new(MockMangaService)
+		handler := NewMangaHandler(svc)
+		svc.On("SearchMangas", "naruto").Return([]*models.Manga{{Title: "Naruto"}}, nil).Once()
+
+		req, _ := http.NewRequest("GET", "/api/manga?q=naruto&sortBy=recent", nil)
+		rr := httptest.NewRecorder()
+		handler.List(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		svc.AssertExpectations(t)
+		svc.AssertNotCalled(t, "SearchMangasWithFilters", mock.Anything)
+	})
+}
