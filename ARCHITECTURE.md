@@ -125,3 +125,15 @@ Cả HTTP (`GET /api/manga`) và gRPC (`MangaService/SearchManga`) chia sẻ cù
 - HTTP handler và gRPC service đều route qua `application.MangaService.SearchMangasWithFilters` khi có filter mới — đảm bảo behavior nhất quán giữa hai protocol.
 - Wire-level back-compat: client cũ chỉ gửi `query` (gRPC) hoặc `?q=` (HTTP) vẫn đi qua đường `SearchMangas` cũ.
 - Chi tiết: xem `API_CONTRACT.md §2.2`.
+
+---
+
+### 🩺 Health Check Contract (Multi-Protocol Liveness)
+
+`GET /api/health` là probe trung tâm cho toàn bộ 6 subsystem (5 protocol + DB):
+- **Concurrency model**: 6 probe chạy song song qua `sync.WaitGroup`, mỗi probe có timeout 500ms riêng → tổng latency endpoint ~500ms thay vì 6×500ms sequential.
+- **Probe semantics**: TCP/gRPC dùng `net.DialTimeout`/`grpc.DialContext`; UDP dùng best-effort `net.Dial`; DB dùng `db.Ping()`; HTTP/WS là self-check (cùng process).
+- **Status code**: `200 OK` khi tất cả `ok`, `503 Service Unavailable` khi bất kỳ subsystem nào fail → kubernetes/CI liveness probe pattern tương thích.
+- **Logging**: mỗi call ghi 2 dòng `log.Printf` với prefix `🩺` (request line + result line) — phục vụ debug và demo trực quan.
+- **Source**: `internal/interfaces/http/handlers.go::HealthHandler.Check`.
+- Chi tiết: xem `API_CONTRACT.md §7`.

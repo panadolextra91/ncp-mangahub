@@ -19,6 +19,7 @@ Dự án này không chỉ là một bài tập kỹ thuật, mà là một tr�
 - **📚 Personal Library**: Thư viện cá nhân cho phép lưu truyện, xem chi tiết và theo dõi tiến độ đọc theo 3 trạng thái.
 - **🕸️ Web Scraping**: Tích hợp bóc tách dữ liệu từ `quotes.toscrape.com` để hiển thị danh ngôn truyền cảm hứng mỗi ngày trên Dashboard.
 - **🔍 Advanced Search & Filtering**: Tìm kiếm nâng cao trên `GET /api/manga` (và gRPC `SearchManga`): lọc theo nhiều genres (OR), trạng thái (`ongoing`/`completed`), và sắp xếp theo `title` hoặc `recent`. Tối đa 10 genres mỗi request.
+- **🩺 Multi-Protocol Health Checks**: `GET /api/health` chủ động probe song song cả 5 protocol (HTTP, TCP, UDP, WS, gRPC) + SQLite DB với timeout 500ms mỗi probe. Trả `200/ok` hoặc `503/degraded` kèm trạng thái chi tiết từng subsystem. Mỗi request được ghi log đầy đủ vào server console (🩺 prefix).
 - **🔋 Graceful Shutdown**: Quy trình tắt máy 5 bước đảm bảo an toàn dữ liệu và giải phóng tài nguyên mạng.
 
 ---

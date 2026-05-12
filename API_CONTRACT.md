@@ -279,3 +279,75 @@ Personal Library hỗ trợ **3 trạng thái đọc** dưới dạng **conventi
 | **Update Progress**| HTTP | **Yes** | Any | UPSERT progress | `http/handlers.go` |
 | **List Library**| HTTP | **Yes** | Any | SELECT Library | `http/handlers.go` |
 | **Web Scraping**| Internal (TUI-invoked)| **N/A** | None | N/A (External fetch) | `application/scraper_service.go` |
+| **Health Check**| HTTP | **No** | None | DB.Ping + port probes | `http/handlers.go` |
+
+---
+
+## 🩺 7. Health Check (Multi-Protocol Liveness)
+
+### 7.1 GET `/api/health`
+- **Endpoint**: `GET /api/health`
+- **📍 Source**: `internal/interfaces/http/handlers.go` -> `HealthHandler.Check`
+- **🛡️ JWT Required**: **No** (probe công khai cho k8s/CI/monitoring)
+- **Purpose**: Chủ động kiểm tra liveness của TẤT CẢ subsystem trong cùng process — không chỉ HTTP. Mỗi subsystem trả về `ok` hoặc `error: <reason>`.
+
+- **Subsystems được probe** (6 probe chạy song song qua `sync.WaitGroup`, timeout 500ms mỗi probe):
+
+| Subsystem | Cách probe |
+| :--- | :--- |
+| `http` | self-check (process đang serve request) — luôn `ok` |
+| `tcp`  | `net.DialTimeout("tcp", "127.0.0.1:9090", 500ms)` rồi đóng ngay |
+| `udp`  | best-effort `net.Dial("udp", "127.0.0.1:9191")` |
+| `ws`   | self-check (cùng port HTTP — `8080`) |
+| `grpc` | `grpc.DialContext("127.0.0.1:50052", insecure, WithBlock, 500ms)` rồi check `connectivity.Ready` |
+| `db`   | `sql.DB.Ping()` |
+
+- **HTTP Status**:
+    - `200 OK` → tất cả subsystem `ok` → response `status="ok"`.
+    - `503 Service Unavailable` → ≥1 subsystem fail → response `status="degraded"`.
+
+- **Response shape**:
+    ```json
+    {
+        "status": "ok",
+        "checks": {
+            "http": "ok",
+            "tcp":  "ok",
+            "udp":  "ok",
+            "ws":   "ok",
+            "grpc": "ok",
+            "db":   "ok"
+        },
+        "bus": { "dropped_events": 0 },
+        "uptime_seconds": 123.45,
+        "timestamp": "2026-05-13T00:15:00Z"
+    }
+    ```
+
+- **Degraded response** (ví dụ TCP server down):
+    ```json
+    {
+        "status": "degraded",
+        "checks": {
+            "http": "ok",
+            "tcp":  "error: dial tcp 127.0.0.1:9090: connect: connection refused",
+            "udp":  "ok",
+            "ws":   "ok",
+            "grpc": "ok",
+            "db":   "ok"
+        },
+        "bus": { "dropped_events": 0 },
+        "uptime_seconds": 45.12,
+        "timestamp": "2026-05-13T00:15:00Z"
+    }
+    ```
+
+- **Server logging** (mỗi call ghi 2 dòng vào `log.Printf` với prefix `🩺`):
+    ```
+    🩺 Health check from 127.0.0.1:54321 at 2026-05-13T00:15:00Z
+    🩺 Health check result: status=ok http=ok tcp=ok udp=ok ws=ok grpc=ok db=ok
+    ```
+
+- **⚠️ Breaking change (post-260513-032)**: Phiên bản pre-032 trả về `{"status": "MangaHub is alive", "db": "OK", "bus": {...}, "timestamp": "..."}` — `status` là greeting string và `db` ở top-level. Phiên bản hiện tại đổi `status` thành enum `"ok"|"degraded"` và `db` move vào `checks.db`. Wire-compat một phần: client chỉ check HTTP 200 vẫn pass khi healthy.
+
+- **Concurrency note**: Total endpoint latency ~500ms worst case nhờ parallel probes (sync.WaitGroup), KHÔNG phải 6×500ms sequential.

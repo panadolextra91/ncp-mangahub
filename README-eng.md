@@ -19,6 +19,7 @@ Experience the ultimate **"TUI-First"** environment with our stylish Pink Pastel
 - **📚 Personal Library**: Save titles to your personal shelf, view details, and track reading progress across three statuses (`reading`, `completed`, `plan_to_read`).
 - **🕸️ Web Scraping**: Integrated quote-of-the-day scraper that pulls inspirational quotes from `quotes.toscrape.com` for the TUI dashboard.
 - **🔍 Advanced Search & Filtering**: Multi-criteria search on `GET /api/manga` and gRPC `SearchManga`: filter by multiple genres (OR), status, and sort by `title` or `recent`. Capped at 10 genres per request.
+- **🩺 Multi-Protocol Health Checks**: `GET /api/health` actively probes all 5 protocols (HTTP, TCP, UDP, WS, gRPC) and the SQLite DB in parallel with a 500ms per-probe timeout. Returns `200/ok` or `503/degraded` with per-subsystem status. Every request is logged to the server console (🩺 prefix).
 - **🌱 Pre-seeded Catalog**: Over 100 popular manga series with rich metadata, ready for instant demo.
 - **🔋 Graceful Shutdown**: A 5-step termination protocol ensuring data integrity and clean resource cleanup.
 
