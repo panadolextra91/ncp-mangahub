@@ -66,6 +66,7 @@ func (h *ChatHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.hub.Register <- client
+	log.Printf("🌐 [WS] New Connection: UserID %d (MangaID: %d)", claims.UserID, mangaID)
 
 	// 3. Send History (Mẹ Architect: Bắt buộc lôi 20 tin gần nhất quăng vào mặt nó)
 	history, err := h.chatService.GetHistory(mangaID)
@@ -78,10 +79,10 @@ func (h *ChatHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Start Goroutines for Read/Write
 	go h.writePump(client)
-	go h.readPump(client, claims.UserID, claims.Role) // We might need name? Let's assume username=claims.Role for demo or fetch
+	go h.readPump(client, claims.UserID, claims.Username)
 }
 
-func (h *ChatHandler) readPump(client *Client, userID int, role string) {
+func (h *ChatHandler) readPump(client *Client, userID int, username string) {
 	conn := client.Conn.(*websocket.Conn)
 	defer func() {
 		h.hub.Unregister <- client
@@ -97,11 +98,12 @@ func (h *ChatHandler) readPump(client *Client, userID int, role string) {
 		chatMsg := &models.ChatMessage{
 			MangaID:    client.MangaID,
 			UserID:     userID,
-			SenderName: role, // Simplification: using role as name for now
+			SenderName: username,
 			Content:    string(message),
 			CreatedAt:  time.Now(),
 		}
 
+		log.Printf("💬 [CHAT] Message from UserID %d: %s", userID, chatMsg.Content)
 		err = h.chatService.SendMessage(chatMsg)
 		if err != nil {
 			log.Printf("Failed to save/broadcast chat message: %v", err)

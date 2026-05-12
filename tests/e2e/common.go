@@ -80,11 +80,16 @@ func StartServer(binaryPath string) (*Server, error) {
 }
 
 func (s *Server) Stop() {
+	if s == nil {
+		return
+	}
 	if s.Cmd != nil && s.Cmd.Process != nil {
 		s.Cmd.Process.Signal(os.Interrupt)
 		s.Cmd.Wait()
 	}
-	os.Remove(s.DBPath)
+	if s.DBPath != "" {
+		os.Remove(s.DBPath)
+	}
 }
 
 func getFreePort() (int, error) {

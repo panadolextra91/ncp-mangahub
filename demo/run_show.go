@@ -11,23 +11,22 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/user/mangahub/pkg/models"
 	"github.com/user/mangahub/pkg/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (
-	HTTP_URL  = "http://localhost:8080"
-	WS_URL    = "ws://localhost:8080/api/chat"
-	TCP_ADDR  = "localhost:9090"
-	UDP_ADDR  = "localhost:9191"
-	GRPC_ADDR = "localhost:50051"
+	HTTP_URL  = "http://127.0.0.1:8080"
+	WS_URL    = "ws://127.0.0.1:8080/api/chat"
+	TCP_ADDR  = "127.0.0.1:9090"
+	UDP_ADDR  = "127.0.0.1:9191"
+	GRPC_ADDR = "127.0.0.1:50052"
 )
 
 func main() {
@@ -66,7 +65,7 @@ func main() {
 	mangaClient := pb.NewMangaServiceClient(grpcConn)
 	adminClient := pb.NewAdminServiceClient(grpcConn)
 	grpcCtx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
-	stream, _ := mangaClient.SubscribeEvents(grpcCtx, &pb.Empty{})
+	stream, _ := mangaClient.SubscribeEvents(grpcCtx, &emptypb.Empty{})
 	fmt.Println("STREAMING! ✅")
 
 	fmt.Println("\n🎬 ================= [ ACT 1: THE RELEASE ] ================= 🎬")
@@ -126,7 +125,7 @@ func main() {
 }
 
 func login() string {
-	url := HTTP_URL + "/api/login"
+	url := HTTP_URL + "/api/auth/login"
 	body := `{"username":"admin","password":"password"}`
 	resp, err := http.Post(url, "application/json", bytes.NewBufferString(body))
 	if err != nil {
@@ -140,7 +139,7 @@ func login() string {
 	json.NewDecoder(resp.Body).Decode(&res)
 	if res.Token == "" {
 		// Try register first
-		regUrl := HTTP_URL + "/api/register"
+		regUrl := HTTP_URL + "/api/auth/register"
 		regBody := `{"username":"admin","password":"password","role":"admin"}`
 		http.Post(regUrl, "application/json", bytes.NewBufferString(regBody))
 		return login()

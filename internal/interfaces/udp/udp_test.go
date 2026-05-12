@@ -29,7 +29,7 @@ func TestUDPProtocolIntegration(t *testing.T) {
 	go serverFixed.Start()
 	time.Sleep(100 * time.Millisecond) // Wait for bind
 
-	token, _ := auth.GenerateToken(1, "user", secret)
+	token, _ := auth.GenerateToken(1, "tester", "user", secret)
 	serverAddr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("127.0.0.1:%d", port))
 	
 	t.Run("SUB and Broadcast", func(t *testing.T) {

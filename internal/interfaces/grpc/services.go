@@ -81,7 +81,20 @@ func (s *MangaService) SubscribeEvents(empty *emptypb.Empty, stream pb.MangaServ
 }
 
 func (s *MangaService) sendEvent(stream pb.MangaService_SubscribeEventsServer, topic string, payload interface{}) {
-	msg := fmt.Sprintf("%v", payload)
+	msg := ""
+	switch topic {
+	case "manga.new":
+		if m, ok := payload.(*models.Manga); ok {
+			msg = fmt.Sprintf("New release: %s by %s", m.Title, m.Author)
+		}
+	case "progress.updated":
+		if p, ok := payload.(*models.UserProgress); ok {
+			msg = fmt.Sprintf("User #%d updated progress on Manga #%d to Chapter %d", p.UserID, p.MangaID, p.CurrentChapter)
+		}
+	default:
+		msg = fmt.Sprintf("%v", payload)
+	}
+
 	notification := &pb.EventNotification{
 		Topic:     topic,
 		Message:   msg,

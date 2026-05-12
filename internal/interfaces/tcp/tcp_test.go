@@ -42,7 +42,7 @@ func TestTCPProtocol(t *testing.T) {
 		assert.NoError(t, err)
 		defer conn.Close()
 
-		token, _ := auth.GenerateToken(1, "user", secret)
+		token, _ := auth.GenerateToken(1, "tester", "user", secret)
 		fmt.Fprintf(conn, "AUTH %s\n", token)
 
 		reader := bufio.NewReader(conn)
@@ -75,7 +75,7 @@ func TestTCPProtocol(t *testing.T) {
 	})
 
 	t.Run("DOS Protection - Max Clients", func(t *testing.T) {
-		token, _ := auth.GenerateToken(1, "user", secret)
+		token, _ := auth.GenerateToken(1, "tester", "user", secret)
 		
 		c1, _ := net.Dial("tcp", addr)
 		fmt.Fprintf(c1, "AUTH %s\n", token)
@@ -108,7 +108,7 @@ func TestTCPProtocol(t *testing.T) {
 
 	t.Run("Broadcasting", func(t *testing.T) {
 		conn, _ := net.Dial("tcp", addr)
-		token, _ := auth.GenerateToken(1, "user", secret)
+		token, _ := auth.GenerateToken(1, "tester", "user", secret)
 		fmt.Fprintf(conn, "AUTH %s\n", token)
 		
 		reader := bufio.NewReader(conn)

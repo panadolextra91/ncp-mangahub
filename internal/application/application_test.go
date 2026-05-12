@@ -39,11 +39,14 @@ func (m *mockMangaRepo) Save(manga *models.Manga) error {
 	return nil
 }
 func (m *mockMangaRepo) FindByID(id int) (*models.Manga, error) { return nil, nil }
+func (m *mockMangaRepo) List() ([]*models.Manga, error)          { return nil, nil }
+func (m *mockMangaRepo) Search(q string) ([]*models.Manga, error) { return nil, nil }
 
 type mockProgressRepo struct{}
 
-func (m *mockProgressRepo) Save(p *models.UserProgress) error { return nil }
+func (m *mockProgressRepo) Save(p *models.UserProgress) error                                     { return nil }
 func (m *mockProgressRepo) FindByUserAndManga(userID, mangaID int) (*models.UserProgress, error) { return nil, nil }
+func (m *mockProgressRepo) GetByUserID(userID int) ([]*models.UserProgress, error)               { return nil, nil }
 
 // --- TESTS ---
 

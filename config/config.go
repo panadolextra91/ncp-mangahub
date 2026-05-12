@@ -46,7 +46,7 @@ func LoadConfig() *Config {
 
 	grpcPort := os.Getenv("GRPC_PORT")
 	if grpcPort == "" {
-		grpcPort = "50051"
+		grpcPort = "50052"
 	}
 
 	maxClientsStr := os.Getenv("MAX_TCP_CLIENTS")

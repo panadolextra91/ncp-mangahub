@@ -12,12 +12,15 @@ type UserRepository interface {
 type MangaRepository interface {
 	Save(manga *models.Manga) error
 	FindByID(id int) (*models.Manga, error)
+	List() ([]*models.Manga, error)
+	Search(query string) ([]*models.Manga, error)
 }
 
 // ProgressRepository controls persistence gateway orchestrating relational mapping states.
 type ProgressRepository interface {
 	Save(progress *models.UserProgress) error
 	FindByUserAndManga(userID, mangaID int) (*models.UserProgress, error)
+	GetByUserID(userID int) ([]*models.UserProgress, error)
 }
 
 type ChatRepository interface {

@@ -9,6 +9,7 @@ import (
 // ProgressService dictates operations around separated Relational Pivot maps tracking spatial contexts.
 type ProgressService interface {
 	UpdateProgress(progress *models.UserProgress) error
+	GetUserProgress(userID int) ([]*models.UserProgress, error)
 }
 
 type progressService struct {
@@ -32,4 +33,8 @@ func (s *progressService) UpdateProgress(progress *models.UserProgress) error {
 	})
 
 	return nil
+}
+
+func (s *progressService) GetUserProgress(userID int) ([]*models.UserProgress, error) {
+	return s.repo.GetByUserID(userID)
 }

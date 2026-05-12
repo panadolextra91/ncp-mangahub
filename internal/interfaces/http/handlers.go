@@ -3,7 +3,9 @@ package http
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/user/mangahub/internal/application"
@@ -39,6 +41,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("👤 [AUTH] New User Registered: %s (Role: %s)", req.Username, req.Role)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
@@ -60,12 +63,13 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT
-	tokenString, err := auth.GenerateToken(user.ID, user.Role, h.jwtSecret)
+	tokenString, err := auth.GenerateToken(user.ID, user.Username, user.Role, h.jwtSecret)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
 
+	log.Printf("🔑 [AUTH] User Logged In: %s (ID: %d)", req.Username, user.ID)
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
 
@@ -95,7 +99,47 @@ func (h *MangaHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("🏗️ [MANGA] New Manga Created: %s (by User Role: %s)", manga.Title, role)
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(manga)
+}
+
+func (h *MangaHandler) List(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	var mangas []*models.Manga
+	var err error
+
+	log.Printf("🔍 [SEARCH] Query: '%s'", q)
+	if q != "" {
+		mangas, err = h.mangaService.SearchMangas(q)
+	} else {
+		mangas, err = h.mangaService.ListMangas()
+	}
+
+	if err != nil {
+		log.Printf("❌ [SEARCH] Error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("✅ [SEARCH] Found %d results for '%s'", len(mangas), q)
+	json.NewEncoder(w).Encode(mangas)
+}
+
+func (h *MangaHandler) Get(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, _ := strconv.Atoi(idStr)
+
+	manga, err := h.mangaService.GetManga(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if manga == nil {
+		http.Error(w, "Manga not found", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(manga)
 }
 
@@ -115,8 +159,9 @@ func (h *ProgressHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		MangaID        int `json:"manga_id"`
-		CurrentChapter int `json:"current_chapter"`
+		MangaID        int    `json:"manga_id"`
+		CurrentChapter int    `json:"current_chapter"`
+		Status         string `json:"status"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
@@ -127,9 +172,27 @@ func (h *ProgressHandler) Update(w http.ResponseWriter, r *http.Request) {
 		UserID:         userID,
 		MangaID:        req.MangaID,
 		CurrentChapter: req.CurrentChapter,
+		Status:         req.Status,
 	}
 
 	if err := h.progressService.UpdateProgress(progress); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("📖 [PROGRESS] User #%d updated Manga #%d to Chapter %d (Status: %s)", userID, req.MangaID, req.CurrentChapter, req.Status)
+
+	json.NewEncoder(w).Encode(progress)
+}
+
+func (h *ProgressHandler) List(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized context", http.StatusUnauthorized)
+		return
+	}
+
+	progress, err := h.progressService.GetUserProgress(userID)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -31,9 +31,12 @@ func SetupRouter(
 
 	// Manga routes
 	mux.Handle("POST /api/manga", authMiddleware(http.HandlerFunc(mangaH.Create)))
+	mux.Handle("GET /api/manga", authMiddleware(http.HandlerFunc(mangaH.List)))
+	mux.Handle("GET /api/manga/{id}", authMiddleware(http.HandlerFunc(mangaH.Get)))
 
 	// Progress routes
 	mux.Handle("PUT /api/manga/progress", authMiddleware(http.HandlerFunc(progH.Update)))
+	mux.Handle("GET /api/manga/library", authMiddleware(http.HandlerFunc(progH.List)))
 
 	// Static Assets (Pink Dashboard)
 	staticSub, _ := fs.Sub(staticAssets, "static")

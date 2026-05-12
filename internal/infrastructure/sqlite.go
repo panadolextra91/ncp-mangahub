@@ -46,6 +46,10 @@ func InitSchema(db *sql.DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT NOT NULL,
 		author TEXT NOT NULL,
+		genres TEXT,
+		status TEXT,
+		total_chapters INTEGER,
+		description TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 
@@ -53,6 +57,7 @@ func InitSchema(db *sql.DB) error {
 		user_id INTEGER NOT NULL,
 		manga_id INTEGER NOT NULL,
 		current_chapter INTEGER NOT NULL,
+		status TEXT DEFAULT 'reading',
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (user_id, manga_id),
 		FOREIGN KEY (user_id) REFERENCES users(id),
@@ -74,5 +79,20 @@ func InitSchema(db *sql.DB) error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize schema: %w", err)
 	}
+
+	// Migrations for existing databases
+	migrations := []string{
+		"ALTER TABLE mangas ADD COLUMN genres TEXT",
+		"ALTER TABLE mangas ADD COLUMN status TEXT",
+		"ALTER TABLE mangas ADD COLUMN total_chapters INTEGER",
+		"ALTER TABLE mangas ADD COLUMN description TEXT",
+		"ALTER TABLE user_progress ADD COLUMN status TEXT DEFAULT 'reading'",
+	}
+
+	for _, m := range migrations {
+		// Ignore errors (e.g., "duplicate column name") as SQLite doesn't have "IF NOT EXISTS" for ADD COLUMN
+		_, _ = db.Exec(m)
+	}
+
 	return nil
 }

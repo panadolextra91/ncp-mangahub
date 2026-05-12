@@ -53,8 +53,8 @@ func TestGRPCIntegration(t *testing.T) {
 	adminClient := pb.NewAdminServiceClient(conn)
 
 	// Tokens
-	adminToken, _ := auth.GenerateToken(1, "admin", secret)
-	userToken, _ := auth.GenerateToken(2, "user", secret)
+	adminToken, _ := auth.GenerateToken(1, "admin_user", "admin", secret)
+	userToken, _ := auth.GenerateToken(2, "normal_user", "user", secret)
 
 	t.Run("Unary: Create Manga (Admin Auth)", func(t *testing.T) {
 		ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+adminToken)

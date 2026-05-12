@@ -60,7 +60,7 @@ graph TD
 | **WebSocket** | 8080 | Chat cộng đồng thời gian thực | `gorilla/websocket` |
 | **TCP** | 9090 | Đồng bộ hóa dữ liệu Binary | Custom Hub + Non-blocking sender |
 | **UDP** | 9191 | Thông báo nhanh (Push Notify) | Fire-and-forget + TTL Registry |
-| **gRPC** | 50051 | Admin API & Event Streaming | Protobuf + Server-side Stream |
+| **gRPC** | 50052 | Admin API & Event Streaming | Protobuf + Server-side Stream |
 
 ---
 

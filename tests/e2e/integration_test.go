@@ -17,8 +17,10 @@ import (
 )
 
 func TestIntegration_MultiProtocolFlow(t *testing.T) {
-	s, err := StartServer("../../mangahub")
-	assert.NoError(t, err)
+	s, err := StartServer("../../mangahub_server")
+	if err != nil {
+		t.Fatalf("Failed to start server: %v", err)
+	}
 	defer s.Stop()
 
 	token := getAuthToken(t, s.Port)

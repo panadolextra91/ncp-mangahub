@@ -14,8 +14,10 @@ import (
 )
 
 func TestIsolation_SlowTCPConsumer(t *testing.T) {
-	s, err := StartServer("../../mangahub")
-	assert.NoError(t, err)
+	s, err := StartServer("../../mangahub_server")
+	if err != nil {
+		t.Fatalf("Failed to start server: %v", err)
+	}
 	defer s.Stop()
 
 	// 1. Register Admin and Login via HTTP to get token

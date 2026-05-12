@@ -25,7 +25,7 @@ func TestAuthMiddleware(t *testing.T) {
 	})
 
 	t.Run("Valid Token", func(t *testing.T) {
-		tokenString, _ := auth.GenerateToken(1, "admin", secret)
+		tokenString, _ := auth.GenerateToken(1, "tester", "admin", secret)
 
 		req := httptest.NewRequest("GET", "/", nil)
 		req.Header.Set("Authorization", "Bearer "+tokenString)

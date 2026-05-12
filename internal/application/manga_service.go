@@ -16,6 +16,8 @@ var (
 type MangaService interface {
 	CreateManga(role string, manga *models.Manga) error
 	GetManga(id int) (*models.Manga, error)
+	ListMangas() ([]*models.Manga, error)
+	SearchMangas(query string) ([]*models.Manga, error)
 }
 
 type mangaService struct {
@@ -49,4 +51,12 @@ func (s *mangaService) CreateManga(role string, manga *models.Manga) error {
 
 func (s *mangaService) GetManga(id int) (*models.Manga, error) {
 	return s.repo.FindByID(id)
+}
+
+func (s *mangaService) ListMangas() ([]*models.Manga, error) {
+	return s.repo.List()
+}
+
+func (s *mangaService) SearchMangas(query string) ([]*models.Manga, error) {
+	return s.repo.Search(query)
 }

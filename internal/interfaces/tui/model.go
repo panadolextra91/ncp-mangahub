@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbletea"
+	"github.com/gorilla/websocket"
 )
 
 type Page int
@@ -13,6 +14,8 @@ const (
 	PageChat
 	PageEvents
 	PageCreate
+	PageProgress
+	PageSearch
 )
 
 type Model struct {
@@ -21,22 +24,37 @@ type Model struct {
 	Token       string
 	Username    string
 	Password    string
+	Role        string
 	ChatInput   string
-	MangaTitle  string
-	MangaAuthor string
-	MangaDesc   string
+	MangaTitle   string
+	MangaAuthor  string
+	MangaGenres  string
+	MangaStatus  string
+	MangaChapters string
+	MangaDesc    string
+	MangaIDInput string
+	ChapterInput string
+	StatusInput  string // Reading, Completed, etc.
+	SearchInput  string
+	SearchResults []string
 	Messages    []string
 	Events      []string
 	Status      string
 	Width       int
 	Height      int
 	Error       string
+	FocusIndex  int // 0, 1, 2 for inputs
+	WS          *websocket.Conn
+	Stream      EventStream
 }
 
 type TickMsg time.Time
 type ChatMsg string
 type EventMsg string
-type LoginSuccessMsg string
+type LoginSuccessMsg struct {
+	Token string
+	Role  string
+}
 type ErrorMsg string
 
 func NewModel() Model {

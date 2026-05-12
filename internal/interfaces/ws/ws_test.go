@@ -43,7 +43,7 @@ func TestWebSocketProtocol(t *testing.T) {
 	url := "ws" + strings.TrimPrefix(s.URL, "http")
 
 	t.Run("Handshake Success & History", func(t *testing.T) {
-		token, _ := auth.GenerateToken(1, "user", secret)
+		token, _ := auth.GenerateToken(1, "tester", "user", secret)
 		fullURL := url + "?manga_id=1&token=" + token
 
 		conn, _, err := websocket.DefaultDialer.Dial(fullURL, nil)
@@ -66,7 +66,7 @@ func TestWebSocketProtocol(t *testing.T) {
 	})
 
 	t.Run("Chat & Broadcast", func(t *testing.T) {
-		token, _ := auth.GenerateToken(1, "user", secret)
+		token, _ := auth.GenerateToken(1, "tester", "user", secret)
 		fullURL := url + "?manga_id=1&token=" + token
 
 		conn, _, _ := websocket.DefaultDialer.Dial(fullURL, nil)

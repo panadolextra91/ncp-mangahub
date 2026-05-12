@@ -9,21 +9,23 @@ import (
 func TestJWT(t *testing.T) {
 	secret := "test-secret"
 	userID := 123
+	username := "alice"
 	role := "admin"
 
 	t.Run("Generate and Validate", func(t *testing.T) {
-		token, err := auth.GenerateToken(userID, role, secret)
+		token, err := auth.GenerateToken(userID, username, role, secret)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, token)
 
 		claims, err := auth.ValidateToken(token, secret)
 		assert.NoError(t, err)
 		assert.Equal(t, userID, claims.UserID)
+		assert.Equal(t, username, claims.Username)
 		assert.Equal(t, role, claims.Role)
 	})
 
 	t.Run("Invalid Secret", func(t *testing.T) {
-		token, _ := auth.GenerateToken(userID, role, secret)
+		token, _ := auth.GenerateToken(userID, username, role, secret)
 		claims, err := auth.ValidateToken(token, "wrong-secret")
 		assert.Error(t, err)
 		assert.Nil(t, claims)

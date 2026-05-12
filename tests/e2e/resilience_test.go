@@ -5,12 +5,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 )
 
 func TestResilience_ConcurrentDBWrites(t *testing.T) {
-	s, err := StartServer("../../mangahub")
-	assert.NoError(t, err)
+	s, err := StartServer("../../mangahub_server")
+	if err != nil {
+		t.Fatalf("Failed to start server: %v", err)
+	}
 	defer s.Stop()
 
 	token := getAuthToken(t, s.Port)

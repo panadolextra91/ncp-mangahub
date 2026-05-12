@@ -1,97 +1,94 @@
-# MangaHub: Multi-Protocol Modular Monolith Architecture
+# 🏗️ MangaHub Architecture
 
-Chào mừng thầy cô và các bạn đến với kiến trúc chi tiết của **MangaHub** - một hệ thống quản lý truyện tranh được thiết kế theo phong cách Modular Monolith, tích hợp 5 loại giao thức mạng khác nhau trên một nền tảng duy nhất.
+MangaHub được xây dựng dựa trên nguyên lý **Clean Architecture (Hexagonal)** kết hợp với mô hình **Modular Monolith**, đảm bảo logic nghiệp vụ hoàn toàn tách biệt với các giao thức giao tiếp và hạ tầng.
 
-## 1. Tổng quan Kiến trúc (High-Level Overview)
-
-MangaHub được xây dựng dựa trên nguyên lý **Clean Architecture (Hexagonal)**, đảm bảo logic nghiệp vụ không bị phụ thuộc vào các chi tiết giao thức hay hạ tầng.
+## 🗺️ System Overview Diagram
 
 ```mermaid
 graph TD
-    Client[Multi-Protocol Clients] --> HTTP[HTTP API - 8080]
-    Client --> WS[WebSocket - 8080]
-    Client --> TCP[TCP Sync - 9090]
-    Client --> UDP[UDP Notify - 9191]
-    Client --> GRPC[gRPC Admin - 50051]
-
-    subgraph Adapters [Interface Adapters]
-        HTTP
-        WS
-        TCP
-        UDP
-        GRPC
+    subgraph Clients [User Interface Layer]
+        TUI["🌸 PinkHub TUI (Bubbletea)"]
+        CLI["🛠️ MangaHub CLI"]
     end
 
-    Adapters --> Bus[Internal EventBus - Go Channels]
-    
-    subgraph Application [Application Layer]
+    subgraph Adapters [Interface Adapters - Ports]
+        HTTP["🌐 REST API (8080)"]
+        WS["💬 WebSocket Chat (8080)"]
+        TCP["🔄 Real-time Sync (9090)"]
+        UDP["🔔 UDP Notifications (9191)"]
+        GRPC["🔐 gRPC Admin (50052)"]
+    end
+
+    subgraph Application [Business Logic Layer]
         MangaSvc[Manga Service]
         AuthSvc[Auth Service]
-        ChatSvc[Chat Service]
+        EventBus[In-Memory Event Bus]
     end
-    
-    Bus <--> Application
-    Application --> Domain[Domain Entities]
-    Application --> DB[(SQLite WAL Mode)]
+
+    subgraph Domain [Core Entities]
+        MangaModel[Manga Entity]
+        UserModel[User Entity]
+        ProgressModel[Progress Entity]
+    end
+
+    subgraph Infrastructure [Data & Persistence]
+        DB[(SQLite Database)]
+    end
+
+    %% Flow: Clients to Adapters
+    TUI --> HTTP
+    TUI --> WS
+    TUI --> UDP
+    CLI --> HTTP
+
+    %% Flow: Adapters to Application
+    HTTP --> AuthSvc
+    HTTP --> MangaSvc
+    WS --> MangaSvc
+    TCP --> MangaSvc
+    GRPC --> AuthSvc
+
+    %% Flow: Application to Domain/Infra
+    MangaSvc --> EventBus
+    MangaSvc --> DB
+    AuthSvc --> DB
+    EventBus -.-> UDP
+    EventBus -.-> TCP
 ```
 
-## 2. Ma trận Giao thức (Protocol Matrix)
+## 🛡️ Các Tầng Kiến Trúc
 
-| Giao thức | Cổng | Vai trò chính | Cơ chế xác thực |
-| :--- | :--- | :--- | :--- |
-| **HTTP** | 8080 | Core API (Register, Login, CRUD) | Bearer JWT |
-| **WebSocket** | 8080 | Chat cộng đồng (Real-time) | Query Param JWT |
-| **TCP** | 9090 | Đồng bộ hóa dữ liệu hiệu năng cao | AUTH Handshake |
-| **UDP** | 9191 | Thông báo nhanh (Fire-and-forget) | SUB Packet JWT |
-| **gRPC** | 50051 | Quản trị & CLI (Stream Events) | Metadata Interceptor |
+### 1. Domain Layer (`/pkg/models`, `/internal/domain`)
+- Chứa các thực thể cốt lõi (Manga, User, Progress).
+- Định nghĩa các **Repository Interfaces** (Ports) - hợp đồng mà tầng Infrastructure phải tuân thủ.
+- **Quy tắc**: Không được import bất kỳ thứ gì từ các tầng bên ngoài.
 
-## 3. Luồng dữ liệu EventBus (Event Propagation)
+### 2. Application Layer (`/internal/application`)
+- Chứa logic nghiệp vụ chính (Use Cases).
+- Điều phối dữ liệu giữa Domain và các Repository.
+- Sử dụng **Event Bus** để giao tiếp không đồng bộ giữa các module (ví dụ: Tạo Manga xong thì phát tin cho UDP Server).
 
-Mọi thay đổi dữ liệu (tạo manga mới, cập nhật tiến độ) đều được phát tán qua một **EventBus** trung tâm.
+### 3. Interface Adapters (`/internal/interfaces`)
+- Triển khai các giao thức giao tiếp (HTTP, gRPC, WebSocket, TCP, UDP).
+- Chuyển đổi dữ liệu từ định dạng bên ngoài (JSON, Protobuf) sang định dạng Domain.
+- Chứa TUI (Terminal User Interface) và CLI.
 
-```mermaid
-sequenceDiagram
-    participant Admin as gRPC/HTTP Client
-    participant App as Application Service
-    participant Bus as internal/eventbus
-    participant Hubs as Protocol Hubs (TCP/WS/UDP)
-    participant User as Multi-Protocol User
+### 4. Infrastructure Layer (`/internal/infrastructure`, `/internal/adapters`)
+- Triển khai chi tiết các Repository (SQLite).
+- Quản lý kết nối cơ sở dữ liệu và cấu hình hệ thống.
 
-    Admin->>App: CreateManga(title)
-    App->>App: Store in SQLite
-    App->>Bus: Publish("manga.new", data)
-    Bus->>Hubs: Broadcast to all subscribers
-    Hubs->>User: JSON Over TCP/WS/UDP
-```
+## 📡 Multi-Protocol Flow
 
-## 4. Quyết định Thiết kế Cốt lõi (Key Design Decisions)
+Khi một bộ truyện mới được tạo qua TUI:
+1. **TUI Client** gửi yêu cầu qua **HTTP POST**.
+2. **Manga Service** lưu vào **SQLite** và gửi một sự kiện vào **Event Bus**.
+3. **UDP Server** nhận sự kiện từ Bus và broadcast qua **UDP** đến tất cả TUI đang lắng nghe.
+4. **WebSocket Server** cho phép các Admin chat với nhau realtime về bộ truyện mới đó.
+5. **TCP Server** đảm bảo dữ liệu tiến độ đọc được đồng bộ ngay lập tức giữa các thiết bị.
 
-### A. SQLite WAL Mode
-Hệ thống sử dụng SQLite với định dạng **Write-Ahead Logging (WAL)**. 
-- **Lý do**: Cho phép đọc và ghi dữ liệu đồng thời mà không bị block. Điều này cực kỳ quan trọng khi có hàng ngàn request hóng biến (Read) và Admin đang cập nhật truyện (Write).
-
-### B. Hub Isolation (Cách ly lỗi)
-Các Hub của TCP và WebSocket được thiết kế theo nguyên lý **Non-blocking Sending**.
-- **Cơ chế**: Mỗi client có một goroutine gửi riêng hoặc sử dụng `select { case ... default }`.
-- **Lợi ích**: Một client mạng chậm (Slow Consumer) sẽ không thể làm nghẽn toàn bộ EventBus của hệ thống.
-
-### C. Graceful Shutdown (Hạ cánh an toàn)
-Sử dụng bộ đôi `context.Context` (Lệnh dừng) và `sync.WaitGroup` (Điểm danh).
-1. Ngắt Ingress (Dừng lắng nghe cổng).
-2. Thông báo Shutdown tới Client (Prevent Thundering Herd).
-3. Đợi các goroutine dọn dẹp xong.
-4. Đóng Database cuối cùng.
-
-## 5. Hướng dẫn Chạy Demo
-
-Hệ thống đi kèm một "Vở kịch tự động" (Master Demo Script) mô phỏng toàn bộ luồng 5 giao thức.
-
-```bash
-# 1. Khởi chạy server
-go run cmd/server/main.go
-
-# 2. Khởi chạy demo (Tại terminal khác)
-go run demo/run_show.go
-```
-
-Dự án được thực hiện với tình yêu và tư duy kiến trúc bởi **Mẹ Architect & Antigravity**. 💖🤖
+## 🛠️ Tech Stack
+- **Language**: Go 1.25+
+- **TUI Framework**: Bubbletea, Lipgloss (Charm Bracelet)
+- **Database**: SQLite (WAL Mode enabled)
+- **Security**: JWT Authentication (Custom claims)
+- **Real-time**: WebSockets & Raw TCP/UDP sockets

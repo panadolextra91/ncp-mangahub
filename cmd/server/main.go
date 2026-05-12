@@ -58,6 +58,27 @@ func main() {
 	progRepo := database.NewSqliteProgressRepository(db)
 	chatRepo := database.NewSqliteChatRepository(db)
 
+	// 6.5 Auto-seeding
+	mangas, _ := mangaRepo.List()
+	if len(mangas) == 0 {
+		log.Println("🌱 Database is empty. Seeding initial manga data...")
+		seedFile, err := os.Open("data/manga_seed.json")
+		if err == nil {
+			var seedData []*models.Manga
+			if err := json.NewDecoder(seedFile).Decode(&seedData); err == nil {
+				for _, m := range seedData {
+					_ = mangaRepo.Save(m)
+				}
+				log.Printf("✅ Successfully seeded %d manga records.", len(seedData))
+			} else {
+				log.Printf("⚠️ Failed to decode seed file: %v", err)
+			}
+			seedFile.Close()
+		} else {
+			log.Printf("⚠️ No seed file found at data/manga_seed.json: %v", err)
+		}
+	}
+
 	// 7. Initialize Services
 	authSvc := application.NewAuthService(userRepo)
 	mangaSvc := application.NewMangaService(mangaRepo, bus)
@@ -114,6 +135,7 @@ func main() {
 			log.Printf("gRPC Listen Error: %v", err)
 			return
 		}
+		log.Printf("📡 gRPC Admin Server listening on :%s", cfg.GRPCPort)
 		go grpcServer.Serve(lis)
 		<-ctx.Done()
 		log.Println("🛑 gRPC Server: GracefulStop...")
