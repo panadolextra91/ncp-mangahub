@@ -1,13 +1,21 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log"
+	"math"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/user/mangahub/internal/application"
 	"github.com/user/mangahub/internal/eventbus"
@@ -238,28 +246,161 @@ func (h *ProgressHandler) List(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(progress)
 }
 
+// HealthHandler probes every listener (HTTP self, TCP, UDP, WS, gRPC) plus the
+// SQLite DB in parallel and reports an aggregate "ok|degraded" status. Every
+// call is logged twice (request + result) per the audit requirement.
 type HealthHandler struct {
-	db  *sql.DB
-	bus *eventbus.EventBus
+	db        *sql.DB
+	bus       *eventbus.EventBus
+	httpPort  string
+	tcpPort   string
+	udpPort   string
+	grpcPort  string
+	startedAt time.Time
 }
 
-func NewHealthHandler(db *sql.DB, bus *eventbus.EventBus) *HealthHandler {
-	return &HealthHandler{db: db, bus: bus}
+func NewHealthHandler(db *sql.DB, bus *eventbus.EventBus, httpPort, tcpPort, udpPort, grpcPort string, startedAt time.Time) *HealthHandler {
+	return &HealthHandler{
+		db:        db,
+		bus:       bus,
+		httpPort:  httpPort,
+		tcpPort:   tcpPort,
+		udpPort:   udpPort,
+		grpcPort:  grpcPort,
+		startedAt: startedAt,
+	}
 }
 
 func (h *HealthHandler) Check(w http.ResponseWriter, r *http.Request) {
-	dbErr := h.db.Ping()
-	dbStatus := "OK"
-	if dbErr != nil {
-		dbStatus = "ERROR"
+	log.Printf("🩺 Health check from %s at %s", r.RemoteAddr, time.Now().UTC().Format(time.RFC3339))
+
+	const probeTimeout = 500 * time.Millisecond
+	results := make(map[string]string, 6)
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	set := func(name, val string) {
+		mu.Lock()
+		results[name] = val
+		mu.Unlock()
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"status": "MangaHub is alive",
-		"db":     dbStatus,
-		"bus": map[string]interface{}{
-			"dropped_events": h.bus.DroppedCount(),
-		},
-		"timestamp": time.Now(),
+	// 1. HTTP self-check — if we are answering this request, HTTP is up.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		set("http", "ok")
+	}()
+
+	// 2. TCP probe — dial + immediate close.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		conn, err := net.DialTimeout("tcp", "127.0.0.1:"+h.tcpPort, probeTimeout)
+		if err != nil {
+			set("tcp", "error: "+err.Error())
+			return
+		}
+		_ = conn.Close()
+		set("tcp", "ok")
+	}()
+
+	// 3. UDP probe — best-effort send (UDP is connectionless; success means
+	// the kernel let us emit a packet to that port).
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		conn, err := net.Dial("udp", "127.0.0.1:"+h.udpPort)
+		if err != nil {
+			set("udp", "error: "+err.Error())
+			return
+		}
+		defer conn.Close()
+		_ = conn.SetWriteDeadline(time.Now().Add(probeTimeout))
+		if _, err := conn.Write([]byte("PING\n")); err != nil {
+			set("udp", "error: "+err.Error())
+			return
+		}
+		set("udp", "ok")
+	}()
+
+	// 4. WS self-check — WS upgrade endpoint is mounted on the same HTTP
+	// listener; if HTTP serves, the upgrade path is reachable.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		set("ws", "ok")
+	}()
+
+	// 5. gRPC probe — dial and wait for Ready within probeTimeout.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), probeTimeout)
+		defer cancel()
+
+		conn, err := grpc.NewClient(
+			"127.0.0.1:"+h.grpcPort,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+		if err != nil {
+			set("grpc", "error: "+err.Error())
+			return
+		}
+		defer conn.Close()
+
+		conn.Connect()
+		for {
+			s := conn.GetState()
+			if s == connectivity.Ready {
+				set("grpc", "ok")
+				return
+			}
+			if !conn.WaitForStateChange(ctx, s) {
+				set("grpc", "error: timeout (last state "+s.String()+")")
+				return
+			}
+		}
+	}()
+
+	// 6. DB probe — keep existing ping semantics.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := h.db.Ping(); err != nil {
+			set("db", "error: "+err.Error())
+			return
+		}
+		set("db", "ok")
+	}()
+
+	wg.Wait()
+
+	overall := "ok"
+	for _, v := range results {
+		if v != "ok" {
+			overall = "degraded"
+			break
+		}
+	}
+
+	uptime := math.Round(time.Since(h.startedAt).Seconds()*100) / 100
+
+	log.Printf("🩺 Health check result: status=%s http=%s tcp=%s udp=%s ws=%s grpc=%s db=%s",
+		overall, results["http"], results["tcp"], results["udp"], results["ws"], results["grpc"], results["db"])
+
+	w.Header().Set("Content-Type", "application/json")
+	if overall == "degraded" {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":         overall,
+		"checks":         results,
+		"bus":            map[string]interface{}{"dropped_events": h.bus.DroppedCount()},
+		"uptime_seconds": uptime,
+		"timestamp":      time.Now().UTC().Format(time.RFC3339),
 	})
 }
