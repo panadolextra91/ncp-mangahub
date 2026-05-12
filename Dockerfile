@@ -1,5 +1,5 @@
 # Stage 1: Build the Go binary
-FROM golang:1.22-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install build dependencies for CGO (SQLite needs it)
 RUN apk add --no-cache gcc musl-dev sqlite-dev
