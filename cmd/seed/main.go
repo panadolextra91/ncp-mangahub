@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/user/mangahub/internal/adapters/database"
+	"github.com/user/mangahub/internal/infrastructure"
 	"github.com/user/mangahub/pkg/models"
 )
 
@@ -13,13 +14,17 @@ func main() {
 	log.Println("🌱 Manual Seeding Process Started...")
 
 	// 1. Kết nối DB
-	db, err := database.NewSQLiteDB("mangahub.db")
+	db, err := infrastructure.NewSQLiteDB("mangahub.db")
 	if err != nil {
 		log.Fatalf("❌ Failed to connect to DB: %v", err)
 	}
 	defer db.Close()
 
-	repo := database.NewSQLiteMangaRepo(db)
+	if err := infrastructure.InitSchema(db); err != nil {
+		log.Fatalf("❌ Failed to initialize schema: %v", err)
+	}
+
+	repo := database.NewSqliteMangaRepository(db)
 
 	// 2. Đọc file JSON
 	data, err := os.ReadFile("data/manga_seed.json")
