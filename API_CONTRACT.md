@@ -78,15 +78,52 @@ sequenceDiagram
     VALUES (?, ?, ?, ?, ?, ?);
     ```
 
-### 2.2 Search / List Manga
-- **Endpoint**: `GET /api/manga?q={query}` (HTTP) hoặc `MangaService/SearchManga` (gRPC)
+### 2.2 Search / List Manga (Advanced Filtering)
+- **Endpoint**: `GET /api/manga` (HTTP) hoặc `MangaService/SearchManga` (gRPC)
+- **📍 Source (HTTP)**: `internal/interfaces/http/handlers.go` -> `MangaHandler.List`
+- **📍 Source (gRPC)**: `internal/interfaces/grpc/services.go` -> `MangaService.SearchManga`
 - **🛡️ JWT Required**: **Yes** (Mọi user đã login đều search được)
-- **Flow**: Query string `q` được chuẩn hóa thành lowercase để tìm kiếm mờ (fuzzy search).
+- **Query Parameters**:
+    - `q` *(string, optional)*: Fuzzy match trên `title` và `author` (case-insensitive `LIKE %q%`).
+    - `genres` *(comma-separated, optional)*: Lọc theo nhiều thể loại. Semantics **OR** giữa các genres. Tối đa **10 genres** mỗi request (vượt thì cắt). Mỗi genre dùng dạng **quoted-token** `%"GENRE"%` để tránh trùng substring (ví dụ `Action` không match nhầm `Reaction`).
+    - `status` *(string, optional)*: So khớp **chính xác** với cột `status` (ví dụ `ongoing`, `completed`).
+    - `sortBy` *(string, optional)*: `title` → sắp xếp `LOWER(title) ASC`; mọi giá trị khác (bao gồm rỗng, `recent`, hoặc giá trị không xác định) → **lenient fallback** `id DESC`.
+- **Combination rule**: Các filter kết hợp theo **AND** giữa các loại (`q AND genres AND status`); riêng nhiều `genres` ghép **OR** với nhau.
+- **gRPC parity**: `SearchRequest` có các trường tương đương — `query=1`, `genres=2`, `status=3`, `sort_by=4`. Wire-level back-compat: client cũ chỉ gửi `query` vẫn chạy đúng đường cũ (`SearchMangas`), không bị ảnh hưởng.
+- **Routing**: HTTP handler và gRPC service đều phát hiện `hasFilters = (len(genres) > 0 || status != "" || (sortBy != "" && sortBy != "recent"))`. Nếu không có filter mới (chỉ `q` hoặc rỗng) → đi qua hàm `SearchMangas`/`ListMangas` cũ → SQL giữ nguyên hành vi pre-WH7, đảm bảo back-compat.
 
-- **SQL Query**:
+- **Example HTTP Requests**:
+    ```
+    GET /api/manga?q=naruto
+    GET /api/manga?genres=Action,Romance&status=ongoing
+    GET /api/manga?q=blue&genres=Sports&sortBy=title
+    ```
+
+- **gRPC SearchRequest**:
+    ```protobuf
+    message SearchRequest {
+        string query = 1;
+        repeated string genres = 2;
+        string status = 3;
+        string sort_by = 4;
+    }
+    ```
+
+- **SQL Query** (dynamic — clauses joined by AND; per-genre clauses joined by OR):
     ```sql
-    SELECT * FROM mangas 
-    WHERE LOWER(title) LIKE LOWER(?) OR LOWER(author) LIKE LOWER(?) 
+    -- Example: q=blue, genres=[Action, Romance], status=ongoing, sortBy=title
+    SELECT id, title, author, genres, status, total_chapters, description, created_at
+    FROM mangas
+    WHERE (LOWER(title) LIKE LOWER(?) OR LOWER(author) LIKE LOWER(?))
+      AND (genres LIKE ? OR genres LIKE ?)   -- args: %"Action"%, %"Romance"%
+      AND status = ?
+    ORDER BY LOWER(title) ASC;               -- sortBy=title; otherwise: id DESC
+    ```
+
+- **Legacy SQL** (khi không có filter mới):
+    ```sql
+    SELECT * FROM mangas
+    WHERE LOWER(title) LIKE LOWER(?) OR LOWER(author) LIKE LOWER(?)
     ORDER BY id DESC;
     ```
 
@@ -177,8 +214,14 @@ sequenceDiagram
     API-->>TUI: 200 OK
 ```
 
-    status = excluded.status, 
-    updated_at = CURRENT_TIMESTAMP;
+- **SQL Query** (UPSERT — match exactly với `internal/adapters/database/sqlite_progress_repo.go` -> `Save`):
+    ```sql
+    INSERT INTO user_progress (user_id, manga_id, current_chapter, status, updated_at)
+    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(user_id, manga_id) DO UPDATE SET
+      current_chapter = excluded.current_chapter,
+      status = excluded.status,
+      updated_at = CURRENT_TIMESTAMP;
     ```
 
 ### 5.2 Get Personal Library
@@ -191,6 +234,34 @@ sequenceDiagram
     ```sql
     SELECT * FROM user_progress WHERE user_id = ? ORDER BY updated_at DESC;
     ```
+
+### 5.3 Reading Statuses (Personal Library)
+
+Personal Library hỗ trợ **3 trạng thái đọc** dưới dạng **convention ở tầng ứng dụng** (không phải SQL CHECK constraint):
+
+- `reading` — đang đọc.
+- `completed` — đã hoàn tất.
+- `plan_to_read` — dự định đọc.
+
+- **Cách set**: gửi qua payload của `PUT /api/manga/progress` (xem §5.1), trường `"status": "reading" | "completed" | "plan_to_read"`.
+- **DB column**: cột `status` trong `user_progress` là kiểu `TEXT` tự do — backend chấp nhận chuỗi nguyên văn, không enforce enum ở tầng SQL. Quy ước 3 trạng thái được TUI và CLI tôn trọng.
+- **📍 Source**: `internal/interfaces/http/handlers.go` -> `ProgressHandler.Update` nhận `status` verbatim; `internal/adapters/database/sqlite_progress_repo.go` -> `Save` lưu bằng UPSERT (xem §5.1).
+
+---
+
+## 🕸️ 6. Web Scraping (Internal Service)
+
+### 6.1 Quote-of-the-day Scraper
+- **Service**: `internal/application/scraper_service.go` -> `ScraperService.FetchQuotes`
+- **Source URL**: `https://quotes.toscrape.com`
+- **Surface**: **Internal service** — KHÔNG phải HTTP endpoint. TUI dashboard (`internal/interfaces/tui/app.go`) gọi trực tiếp `NewScraperService().FetchQuotes()` khi render quote-of-the-day trên màn hình home.
+- **🛡️ JWT Required**: **N/A** (không có network surface bên ngoài; chạy server-side cho TUI).
+- **Implementation note**: Dùng Go stdlib (`net/http` + `regexp`), không phụ thuộc thư viện scraping bên thứ ba. Parse các block `<div class="quote">` để trích `text`, `author`, `tags`.
+
+- **Flow**:
+    1. TUI dashboard load → spawn fetch quote qua `tea.Cmd` (non-blocking).
+    2. `ScraperService.FetchQuotes()` thực hiện `GET quotes.toscrape.com` → parse HTML bằng regex.
+    3. Trả về `[]models.Quote{Text, Author, Tags}` → TUI hiển thị 1 quote ngẫu nhiên trên dashboard.
 
 ---
 
@@ -207,4 +278,4 @@ sequenceDiagram
 | **Sync** | TCP | **Yes** | Any | N/A (Push) | `tcp/server.go` |
 | **Update Progress**| HTTP | **Yes** | Any | UPSERT progress | `http/handlers.go` |
 | **List Library**| HTTP | **Yes** | Any | SELECT Library | `http/handlers.go` |
-| **Web Scraping**| HTTP (External)| **No** | None | N/A (External) | `application/scraper_service.go` |
+| **Web Scraping**| Internal (TUI-invoked)| **N/A** | None | N/A (External fetch) | `application/scraper_service.go` |
